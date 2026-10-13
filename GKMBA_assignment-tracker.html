@@ -1,0 +1,2064 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Assignment Tracker</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  /* layout concept: a single scrolling spine of three modules, each a stack of
+     collapsible weeks, each week a stack of collapsible assignments — the
+     course's own sequence becomes the page's only navigation */
+  :root{
+    --bg:#eef1ee; --surface:#ffffff; --surface-2:#f4f6f3;
+    --fg:#1b231e; --fg-muted:#5c675f; --border:#d8ddd3;
+    --accent:#1f6f5c; --accent-fg:#ffffff; --accent-soft:#e2ede8;
+    --font-display:'Fraunces',Georgia,'Times New Roman',serif;
+    --font-body:'IBM Plex Sans',-apple-system,'Segoe UI',Arial,sans-serif;
+    --font-mono:'IBM Plex Mono','SFMono-Regular',Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#11150f; --surface:#171d15; --surface-2:#1d241a;
+      --fg:#e7ece4; --fg-muted:#9aa79a; --border:#2a3326;
+      --accent:#5fb89d; --accent-fg:#0b1a15; --accent-soft:#1c2a23;
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#11150f; --surface:#171d15; --surface-2:#1d241a;
+    --fg:#e7ece4; --fg-muted:#9aa79a; --border:#2a3326;
+    --accent:#5fb89d; --accent-fg:#0b1a15; --accent-soft:#1c2a23;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--fg);font-family:var(--font-body);line-height:1.5;padding-inline:16px;padding-block:28px 60px;max-width:760px;margin:0 auto}
+  h1,h2,h3,h4{font-family:var(--font-display);font-weight:600;text-wrap:balance;margin:0}
+  a{color:var(--accent)}
+  p{margin:0.6em 0}
+  table{overflow-x:auto}
+
+  .page-head{margin-bottom:28px}
+  .eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+  .page-head h1{font-size:clamp(28px,7vw,40px);margin-bottom:10px}
+  .lede{color:var(--fg-muted);max-width:60ch}
+  .privacy-note{font-size:13px;color:var(--fg-muted);background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-top:14px}
+  .privacy-note strong{color:var(--fg)}
+
+  .stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  .stat-card{flex:1 1 150px;min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;text-decoration:none;color:inherit;display:block}
+  .stat-card:hover{border-color:var(--accent)}
+  .stat-label{font-size:12px;color:var(--fg-muted);display:block;margin-bottom:4px}
+  .stat-frac{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:18px;font-weight:600}
+  .stat-bar{height:5px;border-radius:3px;background:var(--border);margin-top:8px;overflow:hidden}
+  .stat-bar>i{display:block;height:100%;background:var(--accent);width:0%;transition:width .3s}
+
+  .module{margin-top:40px;padding-top:4px}
+  .module-eyebrow{font-family:var(--font-mono);font-size:12px;color:var(--fg-muted);letter-spacing:.06em;text-transform:uppercase;margin:0 0 6px}
+  .module-title{font-size:clamp(22px,5vw,28px)}
+  .module-sub{color:var(--fg-muted);font-size:14px;margin-top:6px;max-width:60ch}
+
+  details.week{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-top:16px;overflow:hidden}
+  details.week>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 16px}
+  details.week>summary::-webkit-details-marker{display:none}
+  .week-num{font-family:var(--font-mono);font-weight:600;background:var(--accent-soft);color:var(--accent);border-radius:8px;min-width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .week-head-text{min-width:0;flex:1}
+  .week-name{display:block;font-family:var(--font-display);font-weight:600;font-size:16px}
+  .week-lessons{display:block;color:var(--fg-muted);font-size:12.5px;margin-top:2px;overflow-wrap:anywhere}
+  .week-progress{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:13px;color:var(--fg-muted);flex-shrink:0;white-space:nowrap}
+  .chev{flex-shrink:0;color:var(--fg-muted);transition:transform .15s}
+  details.week[open]>summary .chev{transform:rotate(180deg)}
+
+  .week-body{padding:0 16px 16px}
+  .no-assignment-list{list-style:none;margin:0 0 10px;padding:10px 12px;background:var(--surface-2);border:1px dashed var(--border);border-radius:10px;font-size:13px;color:var(--fg-muted)}
+  .no-assignment-list li{margin:2px 0}
+  .no-assignment-list .tag{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;border:1px solid var(--border);border-radius:4px;padding:1px 5px;margin-right:6px}
+
+  details.assignment{border:1px solid var(--border);border-radius:10px;margin-top:10px;background:var(--surface-2)}
+  details.assignment>summary{list-style:none;cursor:pointer;display:flex;align-items:flex-start;gap:10px;padding:11px 13px}
+  details.assignment>summary::-webkit-details-marker{display:none}
+  details.assignment .chk{width:19px;height:19px;flex-shrink:0;margin-top:2px;accent-color:var(--accent);cursor:pointer}
+  .a-title{flex:1;min-width:0;font-weight:500;font-size:14.5px;overflow-wrap:anywhere}
+  details.assignment[data-done="1"] .a-title{color:var(--fg-muted);text-decoration:line-through;text-decoration-color:var(--accent)}
+  details.assignment .chev{margin-top:3px}
+  .a-body{padding:0 14px 16px 42px;font-size:14px;color:var(--fg)}
+  .a-body h2,.a-body h3,.a-body h4{font-family:var(--font-body);font-weight:600;font-size:14.5px;margin:14px 0 6px}
+  .a-body h2:first-child{margin-top:0}
+  .a-body ul,.a-body ol{padding-left:1.25em;margin:0.5em 0}
+  .a-body li{margin:3px 0}
+  .a-body code{font-family:var(--font-mono);font-size:12.5px;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:1px 5px}
+  .a-body pre{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;overflow-x:auto;margin:0.6em 0}
+  .a-body pre code{border:none;background:none;padding:0;font-size:12.5px;white-space:pre-wrap;word-break:break-word}
+  .table-wrap{overflow-x:auto;margin:0.6em 0}
+  .a-body table{border-collapse:collapse;width:100%;font-size:13px;min-width:0}
+  .a-body th,.a-body td{border:1px solid var(--border);padding:6px 8px;text-align:left;vertical-align:top}
+  .a-body th{background:var(--surface);font-family:var(--font-mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.03em}
+  .a-body strong{color:var(--fg)}
+
+  .locked-note{margin-top:16px;padding:12px 14px;border:1px dashed var(--border);border-radius:10px;color:var(--fg-muted);font-size:13px}
+
+  .page-foot{margin-top:48px;padding-top:18px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--fg-muted)}
+  .reset-btn{font:inherit;font-size:12.5px;background:none;border:1px solid var(--border);color:var(--fg-muted);border-radius:7px;padding:6px 10px;cursor:pointer}
+  .reset-btn:hover{border-color:var(--accent);color:var(--accent)}
+</style>
+
+<header class="page-head">
+  <p class="eyebrow">GKMBA · Fellow Resource</p>
+  <h1>Assignment Tracker</h1>
+  <p class="lede">All 41 assignments from the GKMBA course, in the exact week-by-week order they were taught. Each one carries the full brief and how-to-do-it instructions — no due dates, no personal answers.</p>
+  <p class="privacy-note"><strong>Your checkmarks are private.</strong> They save only in this browser, on this device — never sent anywhere, and never visible to anyone else who opens this page, including whoever shared it with you.</p>
+  <div class="stats" id="stats-row"></div>
+</header>
+
+<main id="main">
+
+<section class="module" id="module-who">
+  <p class="module-eyebrow">Module 1 of 3</p>
+  <h2 class="module-title">Who Are You?</h2>
+  <p class="module-sub">Weeks 1–4 — know what you actually have before you package or sell any of it.</p>
+
+  <details class="week" data-week="1" open>
+    <summary>
+      <span class="week-num">1</span>
+      <div class="week-head-text">
+        <span class="week-name">Opening</span>
+        <span class="week-lessons">Welcome | Know Yourself</span>
+      </div>
+      <span class="week-progress" data-role="progress">0/5</span>
+      <span class="chev">⌄</span>
+    </summary>
+    <div class="week-body">
+      <div class="assignment-list">
+        <details class="assignment" data-id="know-yourself-skills-inventory-and-matrix">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Know Yourself — Skills Inventory &amp; Skill Matrix</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-kyo-skills"></div>
+        </details>
+        <details class="assignment" data-id="know-yourself-hourly-rate-calculation">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Know Yourself — Effective Hourly Rate</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-kyo-hourly"></div>
+        </details>
+        <details class="assignment" data-id="know-yourself-personal-economy-stage">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Know Yourself — Personal Economy Pyramid Stage</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-kyo-economy"></div>
+        </details>
+        <details class="assignment" data-id="know-yourself-reputation-and-visibility-audit">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Know Yourself — Reputation &amp; Visibility Audit</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-kyo-reputation"></div>
+        </details>
+        <details class="assignment" data-id="know-yourself-weekly-action-tasks">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Know Yourself — Weekly Action Tasks</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-kyo-weekly"></div>
+        </details>
+      </div>
+    </div>
+  </details>
+
+  <details class="week" data-week="2">
+    <summary>
+      <span class="week-num">2</span>
+      <div class="week-head-text">
+        <span class="week-name">Week 2</span>
+        <span class="week-lessons">Poverty Ecosystem · Thak Gaye Ho Na!</span>
+      </div>
+      <span class="week-progress" data-role="progress">0/1</span>
+      <span class="chev">⌄</span>
+    </summary>
+    <div class="week-body">
+      <ul class="no-assignment-list"><li><span class="tag">no assignment</span>Thak Gaye Ho Na!</li></ul>
+      <div class="assignment-list">
+        <details class="assignment" data-id="W02-A01-the-loop-map">
+          <summary><input type="checkbox" class="chk"><span class="a-title">The Loop Map</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-loopmap"></div>
+        </details>
+      </div>
+    </div>
+  </details>
+
+  <details class="week" data-week="3">
+    <summary>
+      <span class="week-num">3</span>
+      <div class="week-head-text">
+        <span class="week-name">Week 3</span>
+        <span class="week-lessons">How to Be Future-Proof · Relationship Management</span>
+      </div>
+      <span class="week-progress" data-role="progress">0/5</span>
+      <span class="chev">⌄</span>
+    </summary>
+    <div class="week-body">
+      <div class="assignment-list">
+        <details class="assignment" data-id="how-to-be-future-proof-automation-exposure-audit">
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Be Future-Proof — Automation Exposure Audit</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-fp-automation"></div>
+        </details>
+        <details class="assignment" data-id="how-to-be-future-proof-green-red-box">
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Be Future-Proof — Green Box / Red Box</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-fp-greenred"></div>
+        </details>
+        <details class="assignment" data-id="how-to-be-future-proof-job-description-gap-analysis">
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Be Future-Proof — Job Description Gap Analysis</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-fp-jobgap"></div>
+        </details>
+        <details class="assignment" data-id="relationship-management-father-appreciation-exercise">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Relationship Management — Father Appreciation Exercise</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-rm-father"></div>
+        </details>
+        <details class="assignment" data-id="relationship-management-household-budget-audit">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Relationship Management — Household Budget Audit</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-rm-household"></div>
+        </details>
+      </div>
+    </div>
+  </details>
+
+  <details class="week" data-week="4">
+    <summary>
+      <span class="week-num">4</span>
+      <div class="week-head-text">
+        <span class="week-name">Week 4</span>
+        <span class="week-lessons">Inherited Scarcity (2 parts) · How to Design a Profitable Life</span>
+      </div>
+      <span class="week-progress" data-role="progress">0/4</span>
+      <span class="chev">⌄</span>
+    </summary>
+    <div class="week-body">
+      <ul class="no-assignment-list"><li><span class="tag">no assignment</span>Guest Lecture — Rehan Allahwala</li></ul>
+      <div class="assignment-list">
+        <details class="assignment" data-id="inherited-scarcity-movie-reflection">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Inherited Scarcity — Movie Reflection</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-is-movie"></div>
+        </details>
+        <details class="assignment" data-id="inherited-scarcity-money-rules-audit">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Inherited Scarcity — Money Rules Audit</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-is-rules"></div>
+        </details>
+        <details class="assignment" data-id="how-to-design-profitable-life-five-dimension-score">
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Design a Profitable Life — Five-Dimension Score</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-dpl-five"></div>
+        </details>
+        <details class="assignment" data-id="how-to-design-profitable-life-personal-balance-sheet">
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Design a Profitable Life — Personal Balance Sheet</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-dpl-balance"></div>
+        </details>
+      </div>
+    </div>
+  </details>
+</section>
+
+<section class="module" id="module-package">
+  <p class="module-eyebrow">Module 2 of 3</p>
+  <h2 class="module-title">Package Yourself</h2>
+  <p class="module-sub">Weeks 5–9 — turn what you found in Module 1 into something priced, visible, and sellable.</p>
+
+  <details class="week" data-week="5">
+    <summary>
+      <span class="week-num">5</span>
+      <div class="week-head-text">
+        <span class="week-name">Week 5</span>
+        <span class="week-lessons">How to Sell Yourself · Financial Literacy</span>
+      </div>
+      <span class="week-progress" data-role="progress">0/4</span>
+      <span class="chev">⌄</span>
+    </summary>
+    <div class="week-body">
+      <ul class="no-assignment-list"><li><span class="tag">no assignment</span>Guest Lecture — Asim Maharwi</li></ul>
+      <div class="assignment-list">
+        <details class="assignment" data-id="how-to-sell-yourself-cv-rewrite">
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Sell Yourself — CV Rewrite</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-sy-cv"></div>
+        </details>
+        <details class="assignment" data-id="how-to-sell-yourself-60-second-pitch-video">
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Sell Yourself — 60-Second Pitch Video</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-sy-pitch"></div>
+        </details>
+        <details class="assignment" data-id="how-to-sell-yourself-30-day-visibility-plan">
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Sell Yourself — 30-Day Visibility Plan</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-sy-visibility"></div>
+        </details>
+        <details class="assignment" data-id="financial-literacy-budget-and-income-tracking">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Financial Literacy — Budget &amp; Income Tracking</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-fl-budget"></div>
+        </details>
+      </div>
+    </div>
+  </details>
+
+  <details class="week" data-week="6">
+    <summary>
+      <span class="week-num">6</span>
+      <div class="week-head-text">
+        <span class="week-name">Week 6</span>
+        <span class="week-lessons">How to Decide (3 parts) · Science of Money</span>
+      </div>
+      <span class="week-progress" data-role="progress">0/3</span>
+      <span class="chev">⌄</span>
+    </summary>
+    <div class="week-body">
+      <ul class="no-assignment-list">
+        <li><span class="tag">no assignment</span>Guest Lecture — Shahid Hussain Joia: Complete Marketing Roadmap</li>
+        <li><span class="tag">no assignment</span>Guest Lecture — Shahid Hussain Joia: Biggest Reason for Business Failure</li>
+        <li><span class="tag">no assignment</span>Guest Lecture — Hisham Sarwar: Find Your WHY To Start a Business</li>
+      </ul>
+      <div class="assignment-list">
+        <details class="assignment" data-id="how-to-decide-movie-trap-analysis">
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Decide — Movie Trap Analysis</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-htd-movie"></div>
+        </details>
+        <details class="assignment" data-id="how-to-decide-decision-options-worksheet">
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Decide — Decision Options Worksheet</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-htd-options"></div>
+        </details>
+        <details class="assignment" data-id="science-of-money-income-asset-ledger">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Science of Money — Income, Asset &amp; Liability Ledger</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-som-ledger"></div>
+        </details>
+      </div>
+    </div>
+  </details>
+
+  <details class="week" data-week="7">
+    <summary>
+      <span class="week-num">7</span>
+      <div class="week-head-text">
+        <span class="week-name">Week 7</span>
+        <span class="week-lessons">Skills Arbitrage · How to Earn Money</span>
+      </div>
+      <span class="week-progress" data-role="progress">0/2</span>
+      <span class="chev">⌄</span>
+    </summary>
+    <div class="week-body">
+      <ul class="no-assignment-list"><li><span class="tag">no assignment</span>Guest Lecture — Dr Shahid Qureshi</li></ul>
+      <div class="assignment-list">
+        <details class="assignment" data-id="skills-arbitrage-package-and-sell">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Skills Arbitrage — Package and Sell Your "Samosa"</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-sa-samosa"></div>
+        </details>
+        <details class="assignment" data-id="how-to-earn-money-100-income-platforms">
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Earn Money — 100 Income Platforms Audit</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-hem-platforms"></div>
+        </details>
+      </div>
+    </div>
+  </details>
+
+  <details class="week" data-week="8">
+    <summary>
+      <span class="week-num">8</span>
+      <div class="week-head-text">
+        <span class="week-name">Week 8</span>
+        <span class="week-lessons">Getting Paid Across Borders · Earn Extra Income · Bonus: How Lucky Are You</span>
+      </div>
+      <span class="week-progress" data-role="progress">0/3</span>
+      <span class="chev">⌄</span>
+    </summary>
+    <div class="week-body">
+      <ul class="no-assignment-list"><li><span class="tag">no assignment</span>Earn Extra Income</li></ul>
+      <div class="assignment-list">
+        <details class="assignment" data-id="getting-paid-across-borders-hire-or-mentor-a-peer">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Getting Paid Across Borders — Hire or Mentor a Peer</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-gpb-mentor"></div>
+        </details>
+        <details class="assignment" data-id="getting-paid-across-borders-gkmba-feedback-reel">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Getting Paid Across Borders — GKMBA Feedback Reel</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-gpb-reel"></div>
+        </details>
+        <details class="assignment" data-id="how-lucky-are-you-privilege-self-check">
+          <summary><input type="checkbox" class="chk"><span class="a-title">How Lucky Are You — Privilege Self-Check</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-hla-check"></div>
+        </details>
+      </div>
+    </div>
+  </details>
+
+  <details class="week" data-week="9">
+    <summary>
+      <span class="week-num">9</span>
+      <div class="week-head-text">
+        <span class="week-name">Week 9</span>
+        <span class="week-lessons">Prisoners of Geography · Money Stress</span>
+      </div>
+      <span class="week-progress" data-role="progress">0/3</span>
+      <span class="chev">⌄</span>
+    </summary>
+    <div class="week-body">
+      <ul class="no-assignment-list"><li><span class="tag">no assignment</span>Guest Lecture — Malik Ahmad Jalal</li></ul>
+      <div class="assignment-list">
+        <details class="assignment" data-id="prisoners-of-geography-location-audit">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Prisoners of Geography — The Location Audit</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-pog-location"></div>
+        </details>
+        <details class="assignment" data-id="prisoners-of-geography-relocation-decision-memo">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Prisoners of Geography — Career-Path Letter &amp; Relocation Memo</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-pog-relocation"></div>
+        </details>
+        <details class="assignment" data-id="money-stress-financial-situation-audit-and-family-budget">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Money Stress — Financial Situation Audit &amp; Family Budget Meeting</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-ms-audit"></div>
+        </details>
+      </div>
+    </div>
+  </details>
+</section>
+
+<section class="module" id="module-monetize">
+  <p class="module-eyebrow">Module 3 of 3</p>
+  <h2 class="module-title">Monetize &amp; Multiply</h2>
+  <p class="module-sub">Weeks 10–12 — put it to work: marketing, agents, and the final push to Rs 1M.</p>
+
+  <details class="week" data-week="10">
+    <summary>
+      <span class="week-num">10</span>
+      <div class="week-head-text">
+        <span class="week-name">Week 10</span>
+        <span class="week-lessons">Digital Marketing Blueprint</span>
+      </div>
+      <span class="week-progress" data-role="progress">0/3</span>
+      <span class="chev">⌄</span>
+    </summary>
+    <div class="week-body">
+      <ul class="no-assignment-list"><li><span class="tag">no assignment</span>Guest Lecture — Dr. Adnan Masood</li></ul>
+      <div class="assignment-list">
+        <details class="assignment" data-id="digital-marketing-blueprint-generational-interview">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Digital Marketing Blueprint — Generational Interview</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-dmb-interview"></div>
+        </details>
+        <details class="assignment" data-id="digital-marketing-blueprint-brand-comparison">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Digital Marketing Blueprint — Brand Comparison</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-dmb-brand"></div>
+        </details>
+        <details class="assignment" data-id="digital-marketing-blueprint-campaign-gross-roas">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Digital Marketing Blueprint — Campaign Gross / ROAS Calculation</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-dmb-roas"></div>
+        </details>
+      </div>
+    </div>
+  </details>
+
+  <details class="week" data-week="11">
+    <summary>
+      <span class="week-num">11</span>
+      <div class="week-head-text">
+        <span class="week-name">Week 11</span>
+        <span class="week-lessons">Find Your Bottleneck · Agentic AI — Tools to Framework</span>
+      </div>
+      <span class="week-progress" data-role="progress">0/2</span>
+      <span class="chev">⌄</span>
+    </summary>
+    <div class="week-body">
+      <ul class="no-assignment-list">
+        <li><span class="tag">no assignment</span>Open Conversation with Dr. Zeeshan Usmani</li>
+        <li><span class="tag">no assignment</span>Guest Lecture — Dr. Arif Iqbal Rana</li>
+      </ul>
+      <div class="assignment-list">
+        <details class="assignment" data-id="find-your-bottleneck-funnel-map">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Find Your Bottleneck — Map Your Funnel</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-fyb-funnel"></div>
+        </details>
+        <details class="assignment" data-id="agentic-ai-build-and-launch-an-agent">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Agentic AI — Build and Launch an Agent (30-Day Challenge)</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-aai-agent"></div>
+        </details>
+      </div>
+    </div>
+  </details>
+
+  <details class="week" data-week="12">
+    <summary>
+      <span class="week-num">12</span>
+      <div class="week-head-text">
+        <span class="week-name">Week 12</span>
+        <span class="week-lessons">Make a Million · How to Get a Job</span>
+      </div>
+      <span class="week-progress" data-role="progress">0/6</span>
+      <span class="chev">⌄</span>
+    </summary>
+    <div class="week-body">
+      <div class="assignment-list">
+        <details class="assignment" data-id="make-a-million-cashflow-tracking">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Make a Million — 7-Day Family Cash-Flow Tracking</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-mam-cashflow"></div>
+        </details>
+        <details class="assignment" data-id="make-a-million-unfair-advantage-audit">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Make a Million — Unfair Advantage (Moat) Audit</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-mam-advantage"></div>
+        </details>
+        <details class="assignment" data-id="make-a-million-pain-point-audit">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Make a Million — Pain Point Audit (Ask 20 People)</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-mam-pain"></div>
+        </details>
+        <details class="assignment" data-id="how-to-get-a-job-urdu-cv-exercise">
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Get a Job — Write Your CV in Urdu</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-htgaj-urdu"></div>
+        </details>
+        <details class="assignment" data-id="how-to-get-a-job-cv-mistakes-audit">
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Get a Job — CV Lethal Mistakes Audit</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-htgaj-mistakes"></div>
+        </details>
+        <details class="assignment" data-id="how-to-get-a-job-job-hunt-sprint">
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Get a Job — 30-Day Job Hunt Sprint</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-htgaj-sprint"></div>
+        </details>
+      </div>
+    </div>
+  </details>
+
+  <p class="locked-note">Closing module is locked until Oct 17, 2026, 8:00 PM — no assignment posted yet. This page will need a Week 13 section added once it unlocks.</p>
+</section>
+
+</main>
+
+<div class="page-foot">
+  <span>41 assignments · 12 weeks · GKMBA course order</span>
+  <button class="reset-btn" id="reset-btn" type="button">Clear my checkmarks</button>
+</div>
+
+<!-- ===== markdown sources (instructions only — no personal solutions) ===== -->
+<script type="text/markdown" id="md-kyo-skills">
+## Assignment brief (as given)
+
+1. Write 20 real skills you have — be brutally honest, don't over- or under-estimate yourself. Include things you do at work (without supervision), things you do at home, and things you've learned on the side.
+2. Circle which of the 20 are actually **saleable** (someone has paid, or would pay, for them) vs. not.
+3. From the saleable ones, score each by: **Demand** (does anyone ask you for it?), **Rarity** (how many other people can also do it?), **Proof** (can you show you've done it — paid for it before, or someone else gets paid for the same thing?).
+4. Narrow down to your **top 3** skills — the ones you'll sell/focus on for the next 3 months.
+5. Put this into a sheet (handwritten or Excel) — this sheet is called your **Skill Matrix**.
+
+## How to do it
+
+- Write fast, don't overthink — aim for 20 items in 5–10 minutes. The instructor explicitly warns: most people can't get past 7–8 unless they push themselves, and everyone has at least 20 if they count work skills + home skills + side-learning.
+- Don't confuse passion with a sellable skill — "I love reading" isn't sellable by itself, but "I write book reviews" might be.
+- For each candidate skill, ask: has anyone (ever) paid me, or paid someone else, for this exact thing?
+- Score surviving skills on three axes — Demand × Rarity × Proof — and keep the top 3.
+
+## Example (filled, illustrative only — not real data)
+
+```
+20 skills (raw list): Excel modeling, Python scripting, cooking, driving, basic
+plumbing fixes, tutoring kids in math, public speaking, closing financial
+statements, Power BI dashboards, graphic design in Canva, negotiating prices,
+sewing/tailoring, photography, copywriting, bookkeeping, fixing phones,
+gardening, event planning, translating Urdu-English, voice-over recording.
+
+Saleable (circled): Excel modeling, Python scripting, Power BI dashboards,
+tutoring kids in math, copywriting, translating Urdu-English.
+
+Skill Matrix (Demand / Rarity / Proof, each out of 5):
+- Python scripting        — Demand 5, Rarity 3, Proof 4 → Score 60
+- Power BI dashboards      — Demand 4, Rarity 4, Proof 3 → Score 48
+- Copywriting              — Demand 4, Rarity 2, Proof 3 → Score 24
+
+Top 3 to focus on next 3 months: Python scripting, Power BI dashboards, Copywriting.
+```
+</script>
+
+<script type="text/markdown" id="md-kyo-hourly">
+## Assignment brief (as given)
+
+Find your *real* effective hourly rate — not your advertised salary divided by a nominal 8-hour day, but your total monthly income divided by **every** hour that income actually costs you.
+
+1. Write your real monthly income (from all continuous sources: job, rent, recurring family support, etc.).
+2. Write every hour spent to earn it — not just office hours. Include commute time both ways, weekend work, night work, and any work calls outside office hours.
+3. Divide income by total hours to get your effective hourly rate.
+
+## How to do it
+
+| Step | What to count |
+|---|---|
+| 1. Monthly income | Any continuous, predictable monthly inflow — salary, rent received, recurring family support. Don't count one-off windfalls. |
+| 2. Work hours | Scheduled work hours × days worked per month. |
+| 3. Commute hours | Round-trip travel time × days worked per month — the lecture explicitly calls this out as commonly forgotten. |
+| 4. Off-hours work | Weekend work, night work, calls/emails outside office hours — all counted. |
+| 5. Total hours | Sum of 2+3+4. |
+| 6. Effective hourly rate | Monthly income ÷ total hours. |
+
+The point of this number: once you know your real hourly rate, you can judge later decisions (e.g., "is it worth my time to stand in this queue, or should I pay someone else to do it?") against a concrete number instead of a vague feeling.
+
+## Example (filled, illustrative only — not real data)
+
+```
+Monthly income: Rs 100,000
+Work days/month: 22
+Work hours/day: 8
+Commute hours/day (round trip): 2
+Off-hours work (calls/weekend) per month: 10 hours
+
+Total hours = (22 × 8) + (22 × 2) + 10 = 176 + 44 + 10 = 230 hours
+Effective hourly rate = 100,000 ÷ 230 ≈ Rs 435/hour
+```
+</script>
+
+<script type="text/markdown" id="md-kyo-economy">
+## Assignment brief (as given)
+
+Identify which stage of the "personal economy pyramid" you're in today, and name one thing you'll do to invest toward the stage above it.
+
+## How to do it
+
+The instructor's pyramid, bottom to top:
+
+| Stage | How you earn | Ceiling |
+|---|---|---|
+| **Skill economy** | You sell your hours/skill directly (doctor, engineer, data scientist, lawyer). | If you stop working, income stops immediately — "if you die today, you don't get paid tomorrow." |
+| **Essential economy** | You sell necessities at scale (food, housing/rental income, restaurants, clinics) — demand never ends. | Needs capital/assets up front, but income survives you being personally present for every transaction. |
+| **Influencer economy** | You sell trust/attention — people follow your advice/brand. | Needs an audience; can happen out of sequence (e.g. a single viral moment) but is usually built on the stages below. |
+| **Institutional economy** | You sell your solution to organizations (B2B instead of B2C) — one system, many beneficiaries. | Needs a provable system, not just personal skill. |
+| **Nation/narrative economy** | You sell your solution or voice at a national/governmental scale. | Hardest to reach; carries real political risk. |
+
+Steps:
+1. Write which stage you're in **today** (most people are in Skill or Essential).
+2. Write what you're doing in life that's actually *outside* your current stage (wasted effort) vs. what's feeding your climb to the next stage.
+3. Name one concrete action this month that moves you toward the next stage up — don't skip stages.
+
+## Example (filled, illustrative only — not real data)
+
+```
+Current stage: Skill economy (I bill hours as a freelance accountant).
+Wasted effort: Spending 5 hrs/week on social media hoping to "become an
+influencer" with no underlying skill-proof behind it yet.
+Next-stage action: Package my bookkeeping skill into a fixed-fee monthly
+service for 3 small shops (first step toward Essential-economy-style
+recurring, less hours-dependent income).
+```
+</script>
+
+<script type="text/markdown" id="md-kyo-reputation">
+## Assignment brief (as given)
+
+Part A — Reputation check: ask 10 people to describe you, brutally honestly, in their own words. Write down what they say, even if uncomfortable — this is your real "vocabulary" in the world, not your self-image.
+
+Part B — Visibility audit: make a sheet listing every social media / professional profile you have (LinkedIn, Instagram, Facebook, TikTok, YouTube, WhatsApp community/channel, personal website, etc.) with follower/member counts for each, and a grand total. If you don't have a profile on a platform, the instructor says: make one.
+
+## How to do it
+
+**Reputation check**
+1. Ask at least 10 people who know you in different contexts (family, colleagues, friends) one question: "How would you describe me to someone who's never met me?"
+2. Write their answers verbatim, don't edit them to be flattering.
+3. Compare: which version of you is "selling" in the world — the one you think you are, or the one people actually describe? The lecture's point: if you haven't given people the vocabulary to describe your value, they'll invent their own (often unflattering or just wrong).
+
+**Visibility audit**
+1. List every platform you're on (or should be on) in a sheet.
+2. Record follower/connection/member counts for each.
+3. Sum the total. This is your current "findability" — can a potential client/employer actually find and verify you?
+
+## Example (filled, illustrative only — not real data)
+
+```
+Reputation check (10 people, condensed):
+- "Reliable but too quiet in meetings."
+- "Knows Excel better than anyone in the office."
+- "Hard to reach outside work hours."
+- (7 more collected...)
+
+Visibility audit:
+LinkedIn: 340 connections
+Instagram: 120 followers
+Facebook: 580 friends
+YouTube: 0 (no channel yet — to create)
+Personal website: none yet
+WhatsApp community: 1 group, 45 members
+Total visible reach: ~1,085
+```
+</script>
+
+<script type="text/markdown" id="md-kyo-weekly">
+## Assignment brief (as given)
+
+The instructor bundles the week's action items into one push. The concrete, doable ones (beyond the hourly-rate and skills-inventory assignments, which have their own folders) are:
+
+1. Write your **gap statement** — one sentence: who is your buyer, what do they require, what's the gap (what you're missing), and your intention to close it.
+2. Make a **compulsory short video** about what you learned in this class, pitch yourself in it ("I do this work, I'm good at this"), and post it publicly with the hashtag **#GKMBA**.
+3. **Earn extra money this week**, outside your comfort zone — sell something you own (bike/phone/old item), take a short paid gig, or start charging for a favor you currently do for free.
+4. **Make an offer to 5 people** — whatever skill you have, explicitly offer it to 5 specific people this week (not a vague social post — an actual direct offer).
+
+## How to do it
+
+- **Gap statement**: fill in the template "My buyer is ___. They require ___. My gap is ___ (I don't have ___ / I don't know how to ___). My intention is to close this gap by ___." The instructor's point: naming the gap in one sentence is "half the solution."
+- **Video**: keep it simple — a phone-camera talking-head clip about what you learned + a one-line pitch of your skill. Post to any public platform, tag #GKMBA. The instructor calls this *non-optional* — "there is nothing optional" — because visibility compounds and most people never clear this bar.
+- **Extra income**: pick one concrete action (sell an item, take a 2-hour paid gig, charge a friend/relative for something you normally do free) and actually do it this week — the goal is proof you can generate money outside your routine income, however small.
+- **Offer to 5 people**: name 5 real people (by name/relationship) and the specific skill-based offer you made to each.
+
+## Example (filled, illustrative only — not real data)
+
+```
+Gap statement: My buyer is small shop owners who need Excel inventory
+tracking. They require a simple, maintainable sheet. My gap is I don't have
+a portfolio example to show them yet. My intention is to build one free
+demo sheet this week to use as proof.
+
+Video: Posted a 90-second clip to Instagram + LinkedIn: "I just learned the
+personal-economy pyramid in GKMBA — here's which stage I'm in and what I'm
+building toward." Tagged #GKMBA.
+
+Extra income: Sold an old phone for Rs 8,000 and took a 2-hour freelance
+Excel-cleanup gig for Rs 3,000 — total Rs 11,000 extra this week.
+
+Offer to 5 people:
+1. Cousin Ahmed (small retailer) — offered free inventory sheet demo.
+2. Neighbor's shop — offered paid monthly bookkeeping.
+3. Former colleague — offered Power BI dashboard setup.
+4. University group chat — offered Excel tutoring at Rs 500/hr.
+5. LinkedIn contact — offered a resume/CV cleanup service.
+```
+</script>
+
+<script type="text/markdown" id="md-loopmap">
+## Assignment brief (as given)
+
+Map the eight loops that keep you stuck, using one real event from the last 90 days for each loop.
+
+1. Write one dated event for Body, Schooling, Interest, Asset, Record, Circle, Obligation, and Queue.
+2. Write "No event" if a loop has no event.
+3. Choose the one loop that costs you the most.
+4. State its cost in rupees or hours and explain why.
+
+Evidence: put dated findings in the text box. Do not upload files.
+
+## How to do it
+
+For each loop below, find one **real, dated event from the last 90 days** of your own life. If a loop genuinely had no event in that window, write "No event" — don't force one.
+
+| Loop | What it means | Ask yourself |
+|---|---|---|
+| **Body** | Income depends on physical ability to work. Illness/accident → treatment cost + lost income (from savings or borrowed). | Did I get sick/injured and lose work time or pay for treatment? |
+| **Schooling** | Long-term learning sacrificed for short-term survival, or money spent on education/courses that gave no return. | Did I skip/delay learning because money was needed now, or pay for a course/degree that didn't pay off? |
+| **Interest** | No financial buffer, so any shock forces borrowing (loan, EMI, credit card) — real cost is much higher than advertised. | Did I take on debt/EMI/credit card because I had no emergency fund? |
+| **Asset** | Sold something productive (shop, vehicle, gold, machine) under emergency pressure instead of growing it. | Did I sell/liquidate an asset to cover an emergency? |
+| **Record** | A permanent mark (criminal record, credit score, visa/account ban, suspended license) blocks you regardless of effort. | Did a record (legal, credit, visa, account ban) cost me something? |
+| **Circle** | The people around you cap what you think is possible — no one in your circle has "done the work" to advise you upward. | Did my circle limit my perspective or an opportunity in a specific interaction? |
+| **Obligation** | Money claimed by others (relatives, social dues) before it reaches you — these only grow, never shrink. | Did a recurring payment to family/relatives/social obligation hit or increase? |
+| **Queue** | Time lost standing in literal or bureaucratic lines — time that could've been sold at your hourly rate instead. | Did I lose time in a queue (passport office, bank, government office, etc.)? |
+
+### Picking the costliest loop
+
+Compare events using either:
+- **Rupees** — direct money lost/spent (medical bill, interest paid, asset sold at a loss), or
+- **Hours** — time lost × your hourly rate (e.g., "3 hours in a queue × Rs 500/hr = Rs 1,500 lost").
+
+The **reason** should explain *why* it's the costliest — usually because it recurs monthly (Obligation, Interest) or compounds over time (Record, Schooling), not just because the one-time number looks big.
+
+## Paste format required by the assignment
+
+```
+Loop name | date | event
+Repeat for all 8 loops.
+Costliest loop | cost | reason.
+```
+
+## Example (filled, illustrative only — not real data)
+
+```
+Body | 2026-08-02 | Caught dengue, missed 6 workdays, spent Rs 18,000 on tests and treatment.
+Schooling | No event
+Interest | 2026-07-28 | Took a Rs 50,000 personal loan at 2%/month to cover rent after a late client payment.
+Asset | No event
+Record | 2026-08-15 | Bank flagged my account for review after a disputed transaction; funds frozen for 9 days.
+Circle | 2026-09-01 | Spent a week only discussing problems with coworkers who had the same complaints and no new ideas; missed a networking event that could have led to a referral.
+Obligation | 2026-07-20 | Monthly contribution to a relative's household expenses increased from Rs 5,000 to Rs 8,000 with no negotiation.
+Queue | 2026-09-10 | Spent 4 hours at NADRA office renewing a document.
+Costliest loop | Rs 50,000 principal + ~24%/year effective interest | Interest loop costs the most because it compounds monthly and has no fixed end date, unlike the one-time queue or record costs.
+```
+</script>
+
+<script type="text/markdown" id="md-fp-automation">
+## Assignment brief (as given)
+
+The instructor describes 5 layers of automation exposure, in order of how soon AI replaces them:
+
+| Layer | What it covers | When it goes |
+|---|---|---|
+| **Repeat** | Pure repetitive work | Already gone |
+| **Connect/Generate** | Generating posts, images, logos, text drafts, clerical/email work | Already happening, finishing by 2026 |
+| **Analyze** | Reviewing CVs, diagnostics, financial analysis | Next 2–4 years |
+| **Decide** | Judgment calls with consequences (e.g. a judge deciding a sentence) | Next 5–6 years |
+| **Own** | Full accountability when something goes wrong — someone has to "catch the neck" | Hardest to automate |
+
+His exercise: **write ten things** — ten real tasks from your own job/work — and sort each into one of these five layers, so you can see exactly how exposed you currently are.
+
+## How to do it
+
+1. List 10 concrete tasks you actually do in a normal week (not job-title fluff — actual tasks, e.g. "reconcile monthly expense report," "reply to standard customer FAQs," "decide which vendor to hire").
+2. For each task, assign the layer it belongs to today: Repeat / Connect-Generate / Analyze / Decide / Own.
+3. Count how many fall in Repeat/Connect-Generate (high near-term exposure) vs Decide/Own (low exposure).
+4. Write one sentence on what that ratio tells you about your own timeline — if most of your 10 tasks are Repeat/Generate, your runway is short; if most are Decide/Own, you have more time but should still be moving up.
+
+## Example (illustrative only — not real data)
+
+```
+1. Drafting routine email replies — Connect/Generate
+2. Formatting monthly sales report — Repeat
+3. Summarizing customer feedback themes — Analyze
+4. Approving a refund over Rs 10,000 — Decide
+5. Being the name on a signed vendor contract if it fails — Own
+6. Scheduling social posts — Repeat
+7. Writing first-draft ad copy — Connect/Generate
+8. Diagnosing why a campaign underperformed — Analyze
+9. Deciding which 2 of 5 candidates to shortlist — Decide
+10. Taking the blame in a client escalation call — Own
+
+Ratio: 4 Repeat/Generate, 2 Analyze, 2 Decide, 2 Own.
+Takeaway: Half my current tasks (1,2,6,7) are in the layer that's disappearing fastest — I need to shift my week toward tasks 3-10 within the next year, not wait for it to happen to me.
+```
+</script>
+
+<script type="text/markdown" id="md-fp-greenred">
+## Assignment brief (as given)
+
+The instructor runs through people AI clearly can't replace (Messi, a qawwal, Abdul Sattar Edhi, Elon Musk signing off on a decision) and asks: what is it about them that AI can't touch? His answer: it's built from lived experience — judgment, trust, taste, and accountability earned over years, not information.
+
+His exercise: draw/print two boxes for yourself —
+- **Red box** — the things in your work AI already can or soon can replace.
+- **Green box** — the things in your work that come from your own experience, trust, taste, or accountability, which AI cannot replace.
+
+Then study the gap: is your week mostly red-box work (replaceable) or green-box work (durable)?
+
+## How to do it
+
+1. List everything you currently do in your work/role.
+2. Sort each item into the **red box** (repeatable, informational, something an LLM or tool could plausibly do today or soon) or the **green box** (requires your specific lived experience, built trust with specific people, taste/judgment calls, or accountability that can't be outsourced).
+3. Be honest rather than flattering — the instructor's point is that most people overestimate how much of their work is green-box.
+4. Write one sentence on what you'd need to do to move more of your work from red to green (e.g. build a track record that creates trust, develop a point of view/taste no one else has, take on accountability you currently avoid).
+
+## Example (illustrative only — not real data)
+
+```
+Red box: writing routine reports, scheduling, answering FAQ-type client emails, basic data entry, first-draft slide decks.
+Green box: the client relationships I've built over 6 years, my read on which deals are worth chasing, being the person who takes the blame when a campaign fails, my specific negotiation style that's gotten results twice this year.
+
+Gap: ~70% of my week is still red-box. To shift it, I need to stop doing the routine reporting myself (delegate/automate it) and spend that time on the 2-3 client relationships and judgment calls that are actually green-box and irreplaceable.
+```
+</script>
+
+<script type="text/markdown" id="md-fp-jobgap">
+## Assignment brief (as given)
+
+The instructor calls this his most important slide/assignment: "follow the capital." Concretely:
+
+1. Open LinkedIn or any job portal and find a job posting with your exact title.
+2. Copy the full job description into a document.
+3. Ask an LLM (Claude, Gemini, ChatGPT) what skills appear in that job description that **didn't exist 3 years ago**.
+4. Repeat the same search one or two levels above your current title (e.g. senior instead of mid, director instead of manager) to see where the role is heading.
+5. Do this **every week, or at minimum once a month** — it's meant to be a recurring habit, not a one-time exercise.
+
+## How to do it
+
+1. Pick your current job title (or the title you're targeting).
+2. Find 2-3 real, recent postings for that title and for one level above it.
+3. Paste each job description into an LLM and ask explicitly: "What skills or requirements in this job description would not have appeared 3 years ago? List them."
+4. Compare the current-level list vs the one-level-up list — what's newly required *now*, and what's expected *next*.
+5. Pick 1-2 of those new skills to start learning this month.
+6. Put a recurring reminder (weekly or monthly) to redo this — the point is to keep tracking the drift, not to do it once.
+
+## Example (illustrative only — not real data)
+
+```
+Current title: Digital Marketing Executive
+New skills vs 3 years ago (per LLM): "AI-assisted ad copy generation," "prompt engineering for creative briefs," "GenAI content compliance review."
+
+One level up: Digital Marketing Manager
+New skills vs 3 years ago: all of the above, plus "building/managing AI agent workflows for campaign ops," "cross-functional AI governance."
+
+Skills I'm picking up this month: prompt engineering for creative briefs, basic AI workflow tooling (e.g. Zapier/Make).
+Next check-in: first week of next month.
+```
+</script>
+
+<script type="text/markdown" id="md-rm-father">
+## Assignment brief (as given)
+
+The instructor points out that fathers are often the least-thanked, least-noticed member of the family — invisible in photos and memories because they're busy earning while everyone else lives their lives. He gives two small, concrete exercises to break that pattern:
+
+1. Go to your father (or whichever parent/elder fills that "invisible provider" role) and ask him directly: **"How can I help?"**
+2. Go and **hug him for at least 15–60 seconds** — not a quick 2-second courtesy hug.
+
+The instructor claims ~90% of fathers will be moved to tears by this, because no one ever does it.
+
+## How to do it
+
+This isn't a written deliverable — it's a real-world action to actually perform, then reflect on in one or two sentences:
+
+1. Pick a specific day in the next week to do this.
+2. Say the sentence "How can I help?" out loud, and actually listen to the answer instead of offering a generic response.
+3. Give the hug — longer than feels comfortable, no reason needed.
+4. Afterward, write down what happened: his reaction, what he said when you asked how you could help, and anything he told you that you didn't know before.
+
+## Example (illustrative only — not real data)
+
+```
+Date: 2026-10-14
+Action taken: Asked my father "how can I help?" after dinner, then hugged him for about 30 seconds.
+His reaction: He seemed surprised, laughed it off at first, then admitted his knees have been bothering him
+and he's been worried about retirement savings but didn't want to "burden" anyone with it.
+What I learned: He's been quietly managing a health issue and a financial worry for months without
+mentioning either.
+```
+</script>
+
+<script type="text/markdown" id="md-rm-household">
+## Assignment brief (as given)
+
+The instructor notes that most adult children — even in their mid-20s — have no idea what it actually costs to run their own household, because a parent (usually the father) has quietly absorbed and managed all of it. His exercise:
+
+1. Go to your parents, hug them (continuation of the appreciation exercise).
+2. Find out, in real numbers, how much the household actually spends: milk, rice, flour, lentils, chicken/meat, electricity bill.
+3. Find out what the household help (e.g., driver) is paid, and how they spend it.
+4. Find out what your last family trip actually cost (ticket prices, etc.) — the instructor notes almost no one knows this.
+
+## How to do it
+
+1. Sit down with whichever parent manages the household budget.
+2. Ask for actual numbers (not estimates) for each item below, over the last month.
+3. Write them down exactly as given — the point is confronting how little you know, not estimating.
+4. If a number is genuinely unknown even after asking (e.g., records weren't kept), write "Unknown" rather than guessing.
+
+## Example (illustrative only — not real data)
+
+```
+Milk: Rs 6,000/month
+Rice: Rs 3,500/month
+Flour: Rs 2,800/month
+Lentils: Rs 1,200/month
+Chicken/meat: Rs 9,000/month
+Electricity bill: Rs 14,000/month
+Driver's salary: Rs 25,000/month
+Last family trip cost: Rs 180,000 (Murree, 4 nights, including fuel and hotel)
+What surprised me: I had no idea electricity alone was more than double what I spend on my own rent.
+```
+</script>
+
+<script type="text/markdown" id="md-is-movie">
+## Assignment brief (as given)
+
+Watch a movie about someone overcoming adversity, failure, or poverty — pay attention to *who helped that person, who stopped them, and what they did when they were failing*. Then write a **200-300 word summary** connecting the movie's lesson to your own life, and name which loop(s) (from the Loop Map, Week 2) you recognize yourself in, in **two lines**.
+
+## How to do it
+
+1. Pick one movie (biographical or fictional) centered on someone climbing out of hardship. The instructor's point: "the action you get from it that brings change in your life" matters more than entertainment value — watch actively, not passively.
+2. While watching, track: who helped the protagonist, who blocked them, and what the protagonist actually *did* at their lowest point (not just how they felt).
+3. Write 200-300 words linking a specific scene/decision to a specific decision or pattern in your own life.
+4. In 2 extra lines, name which loop(s) from the Loop Map you see yourself in, based on what the movie surfaced for you.
+
+## Example (illustrative only — not real data)
+
+```
+Movie: [a film about someone rebuilding after financial ruin]
+
+Reflection (200-300 words, illustrative excerpt):
+"The turning point wasn't when he got the job — it was when he stopped hiding his situation
+from his son and let a stranger see him struggling. That's the part I related to: I've spent
+two years not telling anyone outside my immediate family that I was behind on payments,
+which meant no one who could actually help even knew to offer. The film's protagonist only
+got traction once he was visible about his situation to the right person, not everyone..."
+[continues to 200-300 words]
+
+Loop(s) recognized: Circle — I've kept my situation inside a circle with no one who's "done
+the work" to advise me upward.
+```
+</script>
+
+<script type="text/markdown" id="md-is-rules">
+## Assignment brief (as given, "5 assignments" consolidated)
+
+Poverty is an inherited "operating system" of unconscious money rules absorbed as a child — rules that fit the parents' context, not necessarily yours. The instructor's 5-part assignment:
+
+1. Write **12-15 sentences** — the money/life rules you absorbed growing up (things you heard repeatedly at home about money, work, asking for help, status, etc.).
+2. For each rule, decide: **Keep**, **Rewrite** (same idea, better wording), or **Retire** (discard entirely).
+3. For each rule you're changing, name it, date when you're changing it, state **what it has cost you** (in rupees or years), and how you're replacing it.
+4. Write your **own new 10-12 family rules** — the ones you want repeated at your own dinner table going forward.
+5. **Interview a parent or grandparent**: ask them 10 questions about what they actually sacrificed/spent/sought for you, then write **500-600 words** in their name (any language — Urdu, Sindhi, English, etc. are all fine).
+
+## How to do it
+
+1. For step 1, think of recurring phrases from childhood, e.g. "money doesn't grow on trees," "we don't ask anyone for anything," "family comes first always." Write them as plain sentences, not vague feelings.
+2. For step 2-3, be honest about cost — the lecture's own example: a rule like "family first always" cost one student Rs 40,000/year for 6 years because she couldn't say no to family financial demands.
+3. For step 4, write rules that are specific enough to say out loud at a table — e.g. "We choose not to buy it, not that we can't afford it" (reframes scarcity as agency, per the lecture).
+4. For step 5, prepare your 10 questions in advance (e.g. "What did you give up so I could study/eat/have X?", "What's one rule you followed that you now regret?", "What's one thing you want me to do differently with money?"). Write the 500-600 words as if narrating in their voice, based on their real answers.
+
+## Example (illustrative only — not real data)
+
+```
+Rules inherited (sample of 12-15):
+1. "We don't ask anyone for help, ever." — RETIRE — cost: missed a scholarship referral in 2019 — replacing with "We ask the right people, respectfully."
+2. "Family comes first, always, no limits." — REWRITE — cost: ~Rs 30,000/year in open-ended support — replacing with "Family comes first, within a fixed monthly share."
+3. "Save whatever is left over." — RETIRE — cost: near-zero savings most years — replacing with "Pay yourself first, 20% before anything else."
+... (continue to 12-15)
+
+New family rules (sample of 10-12):
+1. "We choose not to buy it; we are not choosing it, not failing to afford it."
+2. "We give a fixed, named share to family — not an open-ended one."
+...
+
+Parent interview (500-600 words, illustrative opening only):
+"When your father's business failed in 1998, I started selling home-cooked food to neighbors
+so you could stay in your school. I never told you because I didn't want you to feel like
+a burden..." [continues to 500-600 words]
+```
+</script>
+
+<script type="text/markdown" id="md-dpl-five">
+## Assignment brief (as given)
+
+"Profit" in life isn't just money — score yourself honestly across five dimensions, and flag any dimension that's at or near zero (the instructor's point: if any one dimension is zero, the others can't fully compensate).
+
+1. **Purpose** — alignment between your work and your values/ethics.
+2. **Financial** — sustainable wealth that can actually support your life, not just income.
+3. **Relational** — are the people around you (spouse, kids, parents, siblings) growing *because* of you, or being damaged by your path?
+4. **Time** — do you own your own time, or does your job/boss/phone own it?
+5. **Spiritual** — two litmus tests the instructor gives: can you sleep peacefully at night, and is your focus in prayer/reflection undisturbed? If either is "no," something upstream is wrong.
+
+## How to do it
+
+- Score each dimension honestly, e.g. 1–10, with a one-line justification for the score (not just a number).
+- For Purpose: name one specific thing you do that is/isn't aligned with your stated values.
+- For Relational: name one person who is clearly growing because of you, and one relationship that's being damaged by your current path (if any).
+- For Time: estimate what % of your waking hours someone else currently controls.
+- For Spiritual: answer the two litmus-test questions directly (sleep peacefully? focus in prayer/reflection?).
+- Identify your **lowest-scoring dimension** — that's where to focus first, since a single zero drags down the whole picture.
+
+## Example (filled, illustrative only — not real data)
+
+```
+Purpose: 6/10 — My day job is ethically fine but doesn't use my actual
+values (teaching/mentoring); side tutoring does.
+Financial: 5/10 — Income covers needs but no real savings growth yet.
+Relational: 4/10 — Kids get quality time on weekends, but weekday stress
+spills onto my spouse; this is damaging, not growing, that relationship.
+Time: 3/10 — Roughly 70% of waking hours controlled by employer (office +
+after-hours calls).
+Spiritual: 7/10 — Sleep fine; prayer focus is inconsistent when work stress
+is high.
+
+Lowest-scoring dimension: Time (3/10) — biggest lever to pull first.
+```
+</script>
+
+<script type="text/markdown" id="md-dpl-balance">
+## Assignment brief (as given)
+
+Make a personal balance sheet of your life — in an Excel sheet, the same way a business balance sheet works, but for your whole life, not just money.
+
+1. **Assets** — your skills, relationships, health, faith (not just physical property).
+2. **Liabilities** — distraction, ego, debt, toxic people.
+3. **Net worth** = Assets − Liabilities (don't just focus on growing one domain — the instructor says net worth should rise across *all* domains).
+4. **Emotional wealth** — gratitude, resilience, curiosity (the "currency" that lets you compete with toxicity and setbacks).
+5. **Biggest profit centers** — what/who actually produces value in your life (skills, family, spirituality, network).
+6. **Biggest business expenses** — what drains your life (stress, social media, bad habits) — quantify time lost if possible (e.g., hours/day on social media × days = % of life).
+7. **What has ~10% "ROI"** — which investments (learning, relationships, health) are actually compounding for you.
+
+## How to do it
+
+- Build this as a simple two-column sheet: Assets vs. Liabilities, each broken into Skills / Relationships / Health / Faith categories.
+- Quantify what you can — especially time-based liabilities (e.g., hours/day on a specific distraction, converted to % of waking life).
+- Name your top 3 profit centers and top 3 expense centers explicitly.
+- Identify 1-2 things you're doing that behave like a ~10% ROI investment (compounding) vs. things that don't.
+
+## Example (filled, illustrative only — not real data)
+
+```
+Assets: Data analysis skill, strong marriage, good physical health, consistent prayer habit.
+Liabilities: 2 hours/day doomscrolling, Rs 30,000 personal loan, one toxic friendship.
+Net worth (qualitative): Net positive, but debt + distraction are dragging financial and time domains down.
+Emotional wealth: High gratitude, moderate resilience, low curiosity lately (routine has gotten stale).
+Biggest profit centers: Data skill, spouse's support, professional network from university.
+Biggest business expenses: 2 hrs/day social media (≈8% of waking life), loan interest, the toxic friendship's emotional cost.
+10% ROI items: Daily 20-minute learning habit (compounding skill), weekly date night (compounding relationship).
+```
+</script>
+
+<script type="text/markdown" id="md-sy-cv">
+## Assignment brief (as given)
+
+Rewrite your CV using the instructor's rules:
+1. One position/one-line summary in the **top third** of the page — not an "objective," your actual position/direction.
+2. Every bullet states a **result**, not a duty (not "responsible for handling accounts" — instead the number/outcome it produced).
+3. Delete filler lines entirely: "Respected Sir, I am writing to apply...", "I am hardworking, dedicated, sincere, punctual", father's name/CNIC/marital status/photo, "references available upon request."
+4. Tailor the CV to the specific job description you're applying to (match its keywords).
+5. Max **2 pages**, no font smaller than what's comfortably readable (he mentions reviewers spend ~7.4 seconds on a CV — font 9 fails that test).
+
+## How to do it
+
+1. Pull up your current CV.
+2. Write a one-line position statement for the top third: what you do + direction you're going (not an objective statement).
+3. Go bullet by bullet and convert each duty into a result: "what changed because of what I did," with a real number where possible.
+4. Delete every item in the "do not write" list above.
+5. Trim to 2 pages max.
+6. If you're applying to a specific role, re-read the job description and mirror its key terms in your bullets.
+
+## Example (illustrative only — not real data)
+
+```
+Before: "Responsible for handling accounts and client relationships."
+After:  "Reduced a Faisalabad unit's billing cycle from 5 days to 1 day and recovered Rs 4M in overpaid taxes."
+
+Top-third line: "Operations lead turning slow back-office cycles into same-day turnarounds."
+
+Deleted: "Respected Sir...", "hardworking, dedicated, sincere, punctual", CNIC/marital status/photo, "references available upon request."
+
+Final length: 2 pages.
+```
+</script>
+
+<script type="text/markdown" id="md-sy-pitch">
+## Assignment brief (as given)
+
+"This is the most important exercise of today's class." Record a 60-second video giving your pitch, built from 4 parts: **Hook, Proof, Direction, Closing**. Post it on Instagram, LinkedIn, Facebook, or Twitter/X with the hashtag `#GKMBA`. If you don't post it, the exercise doesn't count — visibility is the point, not just writing the words.
+
+## How to do it
+
+Build your 60-second script from the 4-part formula, same one used earlier in the lecture for the 60-second pitch example ("I help skilled people who feel invisible turn what they already know into income..."):
+
+| Part | What goes here |
+|---|---|
+| **Hook** | One sentence: who you help + what problem you solve. No job-title fluff. |
+| **Proof** | A real number or result — what you already built/fixed/delivered, and for how many people. |
+| **Direction** | What you're doing now / where this is going — compress it into something concrete happening right now. |
+| **Closing** | A direct question or call-to-action to the viewer (e.g. "tell me what skill of yours nobody has paid you for yet"). |
+
+Then:
+1. Write the script first (keep it tight — 60 seconds is ~150 words spoken).
+2. Record it on your phone — don't aim for perfect, the instructor's own first video was "not good."
+3. Post it publicly on at least one platform (Instagram/LinkedIn/Facebook/X) with the hashtag `#GKMBA`.
+4. Note the post link/date so it's on record.
+
+## Example (illustrative only — not real data)
+
+```
+Hook: I help freelance designers who feel invisible turn their portfolio into paid retainer clients.
+Proof: Last quarter I helped 3 freelancers move from one-off gigs to recurring monthly contracts worth Rs 80,000+/month combined.
+Direction: Right now I'm packaging this into a repeatable 30-day positioning sprint.
+Closing: Tell me — what skill of yours has nobody paid you for yet?
+Posted: LinkedIn, 2026-10-05, link saved #GKMBA
+```
+</script>
+
+<script type="text/markdown" id="md-sy-visibility">
+## Assignment brief (as given)
+
+Run a 30-day visibility plan:
+1. Make 4 pitches at the 4 lengths covered in the lecture: 15 seconds, 60 seconds, 3 minutes, and a cold outreach message ("return one").
+2. Publish at least 1 post per week on a platform (Instagram/LinkedIn/Facebook).
+3. Make at least 1 comment every day on related content.
+4. Generate content related to your own posts (follow-ups, examples, results).
+5. Ask 4–5 people in your network for LinkedIn recommendations, so you can show that proof to future clients.
+
+## How to do it
+
+Treat this as a 4-week checklist, not a one-time post:
+
+| Task | Frequency | Done when |
+|---|---|---|
+| 15-second pitch | once | Written + practiced out loud |
+| 60-second pitch | once | Recorded/posted (can reuse the pitch-video assignment) |
+| 3-minute pitch | once | Written + used in at least one real conversation/interview |
+| Cold outreach message | once | Sent to at least 1 real contact |
+| Weekly post | 4x over 30 days | Each one published with a date |
+| Daily comment | ~30x over 30 days | Logged (even just a tally) |
+| LinkedIn recommendation requests | 4-5 people | Each one asked, note who responded |
+
+## Example (illustrative only — not real data)
+
+```
+15-sec pitch: written 2026-10-01, practiced with a friend.
+60-sec pitch: posted on LinkedIn 2026-10-05 (reused pitch-video assignment).
+3-min pitch: used in a real conversation at a networking event, 2026-10-12.
+Cold message: sent to a past client on 2026-10-03, got a reply 2026-10-04.
+Weekly posts: 2026-10-01, 2026-10-08, 2026-10-15, 2026-10-22.
+Daily comments: logged ~22 of 30 days.
+Recommendation requests: asked 5 people, 3 responded by 2026-10-30.
+```
+</script>
+
+<script type="text/markdown" id="md-fl-budget">
+## Assignment brief (as given)
+
+You can't improve what you don't measure. Before you can fix your finances, you have to see them clearly:
+
+1. Track where every rupee of income comes from and where it goes (an Excel sheet / ledger).
+2. Split your spending using the **50-30-20 rule**: 50% needs, 30% wants, 20% savings.
+3. As a reality check on "I'm poor": tally the lifetime resources you've already consumed (food, housing, electricity, gas, water) and note who actually paid for them (yourself vs. family/government/others).
+
+## How to do it
+
+1. **Open a simple ledger** (spreadsheet, notebook, or app) with columns: Date | Source/Category | In | Out | Running Balance.
+2. **Log every transaction for at least one full month** — don't estimate from memory; write it down as it happens (the lecture's point: "you don't know where the money is coming from, where it is going" is the default state for most people).
+3. **Classify each expense** as Need / Want / Saving, then total each bucket as a % of income.
+4. **Compare your actual split to 50-30-20.** Note which bucket is over-sized (usually Wants).
+5. **Do the lifetime-resource gut-check**: roughly estimate what you've consumed in food/rent/utilities since independence, and who funded it. This isn't for precision — it's to recalibrate "how poor am I really" against what's already been given to you.
+
+## Example (illustrative only — not real data)
+
+```
+Month: August 2026
+Income: Rs 120,000 (salary) + Rs 15,000 (freelance) = Rs 135,000
+
+Needs (50% target = Rs 67,500):   Rent 35,000 | Groceries 18,000 | Utilities 6,000 | Fees 5,000   → Rs 64,000 (47%)
+Wants (30% target = Rs 40,500):   Dining out 12,000 | Subscriptions 3,500 | Shopping 22,000       → Rs 37,500 (28%)
+Savings (20% target = Rs 27,000): Transferred to savings account                                  → Rs 33,500 (25%)
+
+Observation: Wants came in under target but mostly because of one big shopping trip — needs
+tracking to see if that's typical or a one-off.
+```
+</script>
+
+<script type="text/markdown" id="md-htd-movie">
+## Assignment brief (as given)
+
+Watch one of the 15 recommended films (or a guest lecture/book, by the same method) **alone**, phone out of the room. For the main character, identify four things, then apply the same lens to yourself. Write 200–300 words and post it publicly within 48 hours.
+
+1. **The Trap** — what specifically trapped the character (no freedom, no passport, no resources, no money, being abused, an enemy, family duty, "what will people say", a fixed-but-safe job)?
+2. **The Turn** — the pivot point, usually near the middle of the story — what changed?
+3. **The Price** — someone always pays the price for the turn (the character, or on their behalf — a mother sells jewelry, a sibling lends money, a mentor steps in). Who paid, and what?
+4. **The "Indian"/boring Tuesday** — the unglamorous, repetitive daily work the character did that the world never noticed, but that's what actually produced the outcome.
+
+Then: can you name your own Trap, Turn, Price, and boring-Tuesday work?
+
+## How to do it
+
+- Watch alone — the instructor is explicit that doing this with family means you can't write or post honestly afterward.
+- Take notes on the four elements *during* the film, not from memory afterward.
+- Write 200–300 words connecting the film's pattern to a real decision/trap in your own life — not just a movie summary.
+- Post publicly (LinkedIn/Facebook/Instagram) within 48 hours, tagging the lecture/assignment, so it becomes part of your visibility record too.
+
+## Example (filled, illustrative only — not real data)
+
+```
+Film: [illustrative choice]
+Trap: The protagonist was trapped by family expectation to take a "safe"
+government job despite having an entrepreneurial idea.
+Turn: Around the midpoint, a personal financial crisis forced the decision
+to finally try the business idea.
+Price: A sibling quietly lent savings without telling the parents.
+Boring Tuesday: Years of unnoticed evening practice refining the product
+before anyone paid attention.
+
+My own trap/turn/price/boring-Tuesday (200-300 words):
+[Write your own reflection connecting this pattern to your real life — e.g.
+your current trap might be "golden handcuffs" of a stable salary, your
+boring-Tuesday work might be the skill you quietly practice after hours.]
+```
+</script>
+
+<script type="text/markdown" id="md-htd-options">
+## Assignment brief (as given)
+
+Take one real, currently-pending decision in your life and work it on paper instead of in your head.
+
+1. Write the decision and its full **context** — what information/resources you actually had available when the situation started (so you can't unfairly judge yourself later with hindsight).
+2. List your real **options** (1, 2, 3...) — each with a name, a target date, its consequences, its benefits, and its losses.
+3. Apply the Islamic 6-step process to move from options to a resolved decision: **Knowledge** (learn about it first) → **Consultation/Shura** (ask people who know) → **Istikhara** (ask Allah for guidance) → **Resolve** → **Action** → **Acceptance** (own the outcome, don't blame others).
+4. Optional mental exercise first: imagine 100+ years from now, everyone involved is gone — this is meant to strip away excess fear before you commit to a choice.
+
+## How to do it
+
+- Pick a decision you're *actually* facing right now (job vs. freelancing, certification vs. sending money home, etc.) — not a hypothetical.
+- Write the context first: what you knew and had access to *at the time*, not what you know now.
+- For each option, fill: Name | Target date | Consequences | Benefits | Losses.
+- Walk through the 6 steps in order — don't skip Consultation or Istikhara to jump straight to Action.
+- Whatever you choose, write one line committing to **own** the outcome rather than blaming whoever advised you.
+
+## Example (filled, illustrative only — not real data)
+
+```
+Decision: Should I keep my Rs 50,000/month job or go freelance full-time?
+Context: I have 6 months of expenses saved, a laptop, and 2 existing
+freelance clients paying ~Rs 15,000/month combined.
+
+Option 1 — Stay employed
+  Date: N/A (status quo)
+  Consequences: Steady income, less time for clients.
+  Benefits: Stability, employer-provided insurance.
+  Losses: Capped income, less time to grow freelance base.
+
+Option 2 — Quit now, go full freelance
+  Date: Immediate
+  Consequences: Full control of time, income uncertain for 2-3 months.
+  Benefits: Unlimited upside, faster skill growth.
+  Losses: Lose stable income and insurance immediately.
+
+Option 3 — Freelance on weekends until it matches 80% of salary, then quit
+  Date: Re-evaluate in 4 months
+  Consequences: Slower transition, less risk.
+  Benefits: De-risked switch, proof before the leap.
+  Losses: Slower growth, double workload for 4 months.
+
+6-step process:
+Knowledge: Researched freelance income variance in my field.
+Consultation: Asked 2 freelancers and my spouse.
+Istikhara: Performed istikhara over 3 nights.
+Resolve: Chose Option 3.
+Action: Set a 4-month deadline and income target (80% of salary).
+Acceptance: Written commitment to not blame advisors if it doesn't work out.
+```
+</script>
+
+<script type="text/markdown" id="md-som-ledger">
+## Assignment brief (as given)
+
+"Your vocabulary has to be clear" before you can grow wealth: Income, Assets, Liabilities, and Net Worth are different things. Homework:
+
+1. Make an Excel sheet (ledger) listing: your income, your assets, your liabilities, and how much your net worth (wealth) can increase.
+2. Separately, write down **every source of income you have ever had in your life** (not just salary) and calculate the total money you've made across your life.
+3. Bonus: write a will — most people have neither insurance nor a will.
+
+## How to do it
+
+1. **Define your net worth**: `Net worth = Assets − Liabilities`. List assets (property, stocks, savings, gold, vehicles) with current value, and liabilities (mortgage, loans, credit card balances) with outstanding amount.
+2. **List every income source**, using the lecture's own categories as a checklist: salary, rental, royalties/patents, dividends, interest, capital gains, freelance, consulting, affiliate/e-commerce, side business — mark which ones actually apply to you, even if small.
+3. **Reconstruct a rough lifetime earnings ledger**: estimate total income earned since you started earning (even approximate numbers count — the point is building the habit of "what gets measured gets managed").
+4. **Write a one-page will** stating how your assets should be distributed, witnessed/dated — even a simple draft is better than none (get it formalized later; this is about starting the habit).
+
+## Example (illustrative only — not real data)
+
+```
+Assets:        Savings Rs 400,000 | Car Rs 1,200,000 | Gold Rs 300,000           = Rs 1,900,000
+Liabilities:   Car loan outstanding Rs 600,000                                   = Rs 600,000
+Net worth:     Rs 1,300,000
+
+Income sources: Salary (main) | Freelance design work (side) | Dividend from 50 shares (small)
+Rough lifetime earned (8 years working): ~Rs 9,600,000
+
+Will (draft): "In case of my death, my assets are to be divided per Islamic inheritance law
+among [heirs], with [specific instruction about the car/savings]." — dated, to be formalized
+with a lawyer.
+```
+</script>
+
+<script type="text/markdown" id="md-sa-samosa">
+## Assignment brief (as given)
+
+The lecture's central metaphor: the same samosa sells for Rs 30 on a footpath and Rs 800 at a hotel — same product, 26x the price, purely from naming, packaging, placement, and proof. You weren't underpaid, you were "underplaced": selling the right thing in the wrong market.
+
+The concrete task: take something you already do (a skill, a dish, a service) and:
+1. **Count it** — define exactly what the unit of value is.
+2. **Name it** — give it a specific, sellable name (not the generic category name — "biryani" vs. "Chef's Signature Dum Biryani").
+3. **Price it** — based on packaging/placement/who's buying, not on your production cost.
+4. **Prove it** — get a proof artifact (testimonial, before/after, portfolio sample).
+5. **Package it** — make its "box"/listing (how it's presented to a buyer).
+6. **List it** on a platform.
+7. **Sell it to 3 people** and upload a screenshot of that proof.
+
+## How to do it
+
+1. Pick one existing skill or service you already deliver (even informally/for free).
+2. Name it specifically — avoid the generic commodity name.
+3. Decide a price based on who's buying and what table you're serving it at (e.g. corporate client vs. neighbor), not your cost to produce it.
+4. Create one proof artifact (sample, screenshot, testimonial) if you don't already have one.
+5. Build a simple listing (a post, a one-pager, a Fiverr/Instagram listing — whatever fits the channel).
+6. Pitch it to or close it with 3 real people.
+7. Screenshot the outcome (payment, confirmation, or agreement) as proof.
+
+## Example (illustrative only — not real data)
+
+```
+Skill: I already write resumes for friends for free.
+Name: "The Interview-Ready CV Rewrite" (not just "resume writing").
+Price: Rs 3,500 for a same-skill output I was giving away free — priced at what a job-seeker values an interview callback at, not at my 45 minutes of typing time.
+Proof: One friend's CV rewrite got her 2 interview callbacks in 10 days — used as a before/after case study.
+Package: A simple one-page Canva flyer + a Fiverr gig listing "ATS-proof CV rewrite, 48-hour turnaround."
+Listed on: Fiverr + a WhatsApp status post to my own contacts.
+Sold to 3 people: real sales tracked once they happen.
+```
+</script>
+
+<script type="text/markdown" id="md-hem-platforms">
+## Assignment brief (as given)
+
+"Your homework is to visit 100 sites" where people sell skills/services globally (freelance marketplaces, gig platforms, content/voice licensing sites, teaching platforms, etc.), identify the **top 10** that fit you, make an account on them, and start earning — "you don't need money to make an account."
+
+## How to do it
+
+1. **Build a list of 100 candidate platforms.** Cast wide across categories: freelance/gig (e.g. general skill marketplaces), teaching/tutoring (language, academic, skills), content licensing (stock content, voice, AI-training data marketplaces), consulting/mentorship platforms, affiliate/e-commerce platforms, local service apps.
+2. **Score each one** against your own skills/interests (even rough fit is fine at this stage) and note: what you could realistically offer, and whether it's free to join.
+3. **Narrow to your Top 10** — the ones where your current skills have the best realistic shot at landing paid work soon.
+4. **Create accounts on at least 2-3 of your Top 10** and complete your profile (the lecture's emphasis: don't just list, open the account — "You can teach Urdu, you can teach Punjabi" — the bar for starting is low).
+5. **Note your first concrete next step** on each (e.g. "post first gig," "apply to 5 listings," "upload first sample").
+
+## Example (illustrative only — not real data)
+
+```
+Top 10 (sample):
+1. [General freelance marketplace] — offer: copywriting — free to join — account created, profile 60% done
+2. [Language tutoring platform] — offer: teach Urdu conversation — free to join — account created
+3. [Voice/content licensing site] — offer: license voice samples — free to join — researching terms
+4. [Local gig app] — offer: weekend graphic design — free to join — not started
+... (continue to 10)
+
+Next steps: finish profile on #1 this week, record 3 sample voice clips for #3.
+```
+</script>
+
+<script type="text/markdown" id="md-gpb-mentor">
+## Assignment brief (as given)
+
+The instructor's framing: "skills give you a job... structure is what collects the money." In the ~500-person cohort, roughly 30 people don't have a job. The assignment is to close that gap yourself by becoming the "employer" for once, to learn first-hand why people struggle to get hired:
+
+- Either hire one of them as a paid intern (lecture suggests ~Rs 25,000/month, 3-month internship) to help with social media, research assistance, or similar small work, **or**
+- At minimum, start mentoring one person: a weekly or monthly call (even just 10–30 minutes) teaching them something concrete — e.g., how to build a CV, how to find clients.
+
+The stated payoff: acting as the employer side for once teaches you exactly why people don't get hired — which doubles as market research on your own hiring/employability gaps.
+
+## How to do it
+
+1. Identify one person (from your own network or the course community) who is currently unemployed or underemployed.
+2. Decide which tier you can commit to: paid micro-internship, unpaid task-based help, or a recurring mentoring call.
+3. Set one concrete cadence (e.g., "30 minutes every other Sunday") and one concrete teaching goal (e.g., "get their CV to a hireable state in 4 sessions").
+4. After a few sessions, write down what you learned about *why* people aren't getting hired — this is the actual deliverable, not just the act of mentoring.
+
+## Example (illustrative only — not real data)
+
+```
+Person: A former classmate, unemployed for 8 months, has a marketing degree but no portfolio.
+Commitment: 30-minute call every Saturday for 6 weeks, unpaid.
+Goal: Build one real case-study portfolio piece and a cleaned-up CV.
+What I learned: Her CV listed duties, not results — zero numbers anywhere. That alone likely explains
+most of the silence from applications. Confidence in interviews was fine; the paper never got her to the interview.
+```
+</script>
+
+<script type="text/markdown" id="md-gpb-reel">
+## Assignment brief (as given)
+
+This is flagged as a **compulsory** assignment — the instructor states you will not get the course certificate without it.
+
+Make a simple 90–180 second vertical (portrait) video reel giving honest feedback about GKMBA:
+- What you learned (or didn't learn).
+- Honest feedback — positive or negative, it doesn't matter, "we don't care what you say... whatever is real."
+- If you earned money, found a job, or were able to leave the country because of the course, say so.
+- Which session was most/least beneficial.
+
+Upload it **publicly** to YouTube first (not private), then share the link across other platforms. Keep working on it through the end of the course — this one isn't due after a single week.
+
+## How to do it
+
+1. Record a vertical video, 90–180 seconds, talking directly to camera.
+2. Structure it loosely as: what you came in expecting → what you actually learned/earned/changed → one honest criticism or gap.
+3. Upload to YouTube with public visibility, grab the link.
+4. Cross-post the link to your other social platforms.
+5. Keep the link — you'll need it for course completion.
+
+## Example (illustrative only — not a real testimonial)
+
+```
+Rough script outline:
+0:00–0:15 — "I joined GKMBA expecting generic productivity tips, mainly to see what the hype was about."
+0:15–0:45 — "What actually changed: I did the loop-map assignment and realized my 'interest loop' was the real
+             drain, not lack of income. Renegotiated a personal loan and cut my effective monthly interest cost."
+0:45–1:10 — "The skills-arbitrage lecture pushed me to repackage a service I was giving away cheaply —
+             picked up one new paying client within 3 weeks of applying it."
+1:10–1:30 — "Honest gap: the AI lecture moved fast for anyone without a technical background; I had to
+             re-watch it twice."
+```
+</script>
+
+<script type="text/markdown" id="md-hla-check">
+## Assignment brief (as given)
+
+Answer a 20-question yes/no self-check against real global statistics, score yourself out of 20, then share your score publicly with the hashtag #GKMBA.
+
+## How to do it
+
+Answer **yes/no** (1 point per "yes") for each:
+
+1. Did you have clean water to drink today?
+2. Is there a clean toilet/washroom in your house?
+3. Do you have a place in your house to wash your hands?
+4. Does your house have working electric lighting?
+5. Is food cooked on a stove/gas in your house?
+6. Does your house have a lockable door and floor?
+7. Did you eat a full meal today?
+8. Do you know where tomorrow's food will come from?
+9. Do you have money to buy fruit, vegetables, and milk this week?
+10. Can you spend $3/day on your family?
+11. Do you have a bank account or registered mobile wallet in your name?
+12. Are you able to watch lectures/content online?
+13. Can you read this sentence?
+14. Do you have a bachelor's degree (or higher)?
+15. Do you have access to any working transportation (even a taxi/rickshaw)?
+16. Have you ever flown on a plane?
+17. Have you ever traveled outside your country?
+18. If you got sick, do you have real hope of seeing a doctor?
+19. Can you confidently expect to wake up tomorrow where you went to sleep (i.e., not displaced/a refugee)?
+20. (Optional 20th, per the instructor's framing) Do you have a degree/education at all (literacy)?
+
+Scoring bands (per the lecture):
+- **17–20**: you are living a life most of the world prays for.
+- **11–16**: you're already better off than half the world.
+- **Below 11**: still better off than a meaningful share of the world — the point isn't shame, it's calibrated gratitude.
+
+Then: share your score on social media with #GKMBA, and optionally check your income/asset percentile on a global wealth-comparison site (the lecture notes Rs 2.4 million in total assets already puts you ahead of half the world; $1M ≈ global top 1%).
+
+## Example (filled, illustrative only — not real data)
+
+```
+Score: 18/20 (missing: "ever traveled outside my country", "can spend $3/day
+on family without thinking about it")
+Band: 17-20 — living a life most of the world prays for.
+Global asset percentile check: ~top 15% globally based on total assets.
+Shared on: LinkedIn, tagged #GKMBA.
+```
+</script>
+
+<script type="text/markdown" id="md-pog-location">
+## Assignment brief (as given)
+
+The instructor's core claim: only ~3% of people ever move location, yet income is heavily tied to whether you did. Location truly controls 6 things (currency, mobility/passport, default local buyer, cost base, infrastructure, and the "image" your origin creates in a buyer's head) — but many things people blame on location are actually gaps in communication, effort, or proof that can be engineered around without moving.
+
+Do a two-column audit:
+1. **Left column** — constraints your location *truly* imposes on your line of work (things on the 6-factor list above that you genuinely cannot route around from where you are).
+2. **Right column** — everything you currently blame on your location that is actually a communication/effort/proof gap, plus the workaround for each (the lecture's own example: "I can't get paid because no PayPal in Pakistan" → open a US LLC, which unlocks PayPal).
+
+## How to do it
+
+1. List every work-related frustration you currently attribute to "being in my country" / "being where I am."
+2. For each one, ask: is this truly one of the 6 location-locked factors (currency, passport/mobility, default buyer, cost base, infrastructure, perceived origin), or is there a documented workaround used by others in the same spot?
+3. Sort into the two columns. Nothing should sit in the middle — force a decision.
+4. For every right-column item, write the specific workaround (a tool, a legal structure, a proof artifact) — not just "I should try harder."
+
+## Example (illustrative only — not real data)
+
+```
+Left column (truly location-locked):
+- My local market pays per-project rates ~70% lower than US clients for the same web dev work (cost-base/default-buyer effect).
+- My passport requires a visa for most Schengen/UK client-site visits, which some contracts require in person.
+
+Right column (blamed on location, actually fixable):
+- "I can't invoice in USD" → Register a US LLC + Wise/Payoneer business account; doesn't require relocating.
+- "Clients don't trust a Pakistan-based freelancer" → Build a portfolio site + verified reviews + a US-registered business name; proof substitutes for geography.
+- "I can't take international calls at client hours" → Block 2 hours of US-business-hours overlap in my schedule; this is an effort gap, not a location one.
+```
+</script>
+
+<script type="text/markdown" id="md-pog-relocation">
+## Assignment brief (as given)
+
+Two linked deliverables from the lecture:
+
+1. **Career-path letter** — write, as a letter to yourself, your target direction: which employer/industry you're aiming at, what certification or step you need next (the lecture's own example: aiming at cybersecurity → a Palantir-type employer → needs CompTIA A+ / Security+ / CISSP as the next concrete step), and what you have to do to move toward it. "Skills travel lighter than luggage" — the point is to know your skill-path *before* deciding whether your body needs to move.
+2. **Relocation decision memo** — after doing the location audit (see the sibling assignment, above), decide: do you want to leave the country or not? Whichever you choose, you must state a reason. "If you want to go, there should be a reason. If you don't want to go, there should be a reason." If you can't decide yet, the explicit fallback is: keep working on your skills first.
+
+## How to do it
+
+1. Name one specific target employer, industry, or role you're aiming at.
+2. Write the next concrete certification/skill step required to move toward it (not a vague "get better," a named credential or milestone).
+3. State, in one paragraph, your decision on relocation — stay or go — with your actual reasoning (financial, family, skill-readiness, market access). A reason is required either way; "I haven't decided" is only acceptable if paired with "so I will spend the next period working on skills instead."
+
+## Example (illustrative only — not real data)
+
+```
+Career-path letter:
+Target: Mid-level backend/data engineer role at a US or EU-based remote-first company.
+Next concrete step: AWS Solutions Architect Associate certification within 90 days; build 2 portfolio projects using it.
+
+Relocation decision memo:
+Decision: Stay in Pakistan for now, work remotely.
+Reason: My current clients pay in USD via an LLC structure already, so the income gap from moving is small relative to the cost/risk of relocating with two school-age kids mid-year. Revisit this decision once the AWS certification is done and remote income crosses $3,000/month.
+```
+</script>
+
+<script type="text/markdown" id="md-ms-audit">
+## Assignment brief (as given)
+
+Until you think long-term, you keep falling back into the same money-stress cycle every 2-5-10 years. The fix starts with:
+
+1. Access/assess your **current financial situation** (most people genuinely don't know this).
+2. Make a **monthly household budget**.
+3. Sit down with your spouse/kids and identify specific things you can cut from Wants (not Needs) to reduce expenses.
+4. Check: do you have insurance? Do you have a will? Most people have neither — fix that too (see Week 6's Science of Money ledger+will template).
+
+## How to do it
+
+1. **Write your current financial snapshot**: total monthly income, total monthly expenses, total debt, total savings — right now, not an ideal version.
+2. **Build a monthly budget** (pair with the Financial Literacy 50-30-20 split from Week 5 if you haven't already).
+3. **Hold an actual family meeting** — "take a copy and sit with your wife and kids" — and go through discretionary spending line by line (eating out, movies, outside coffee, subscriptions) to agree on 2-3 concrete cuts.
+4. **Confirm insurance/will status** and note what's missing.
+
+## Example (illustrative only — not real data)
+
+```
+Current snapshot: Income Rs 150,000/mo | Expenses Rs 145,000/mo | Debt Rs 300,000 (car loan) | Savings Rs 20,000
+
+Family meeting outcome (3 cuts agreed):
+1. Eating out: 4x/month → 1x/month (saves ~Rs 8,000)
+2. Cancel 2 unused subscriptions (saves ~Rs 2,500)
+3. Carpool to work 3 days/week instead of daily fuel (saves ~Rs 4,000)
+
+Insurance: none currently — researching halal/takaful options this month.
+Will: none — drafting a basic one this month.
+```
+</script>
+
+<script type="text/markdown" id="md-dmb-interview">
+## Assignment brief (as given)
+
+Find a relative from an older generation (ideally 80-90 years old — "silent generation" or "greatest generation"), and interview them for 15-30 minutes. Ask about their smartphone, media habits (do they use Netflix, what shows), and write down their habits. The point: understand how disconnected/different their world and media consumption is from yours, since you can't do digital marketing without understanding your actual audience.
+
+## How to do it
+
+1. Pick a relative from a different generation than yours (the older the contrast, the clearer the lesson — grandparent-age is ideal, but a parent-age or much-younger relative also works for a different contrast).
+2. Spend 15-30 minutes with them, asking things like:
+   - What phone do you use, and how do you use it?
+   - What shows/media do you watch, and on what?
+   - Where do you get your news?
+   - How do you decide what to buy?
+3. Write down their habits verbatim where possible — don't paraphrase into "digital marketing" language, capture it raw.
+4. Note the generation they belong to (Greatest/Silent/Boomer/Gen X/Millennial/Gen Z/Alpha) based on birth year.
+5. Write 2-3 sentences on what surprised you / how different their media world is from yours.
+
+## Example (illustrative only — not real data)
+
+```
+Relative: Maternal grandmother, age 82 (Silent Generation, born 1944)
+Date: 2026-09-20
+Phone: Uses a basic keypad phone, only for calls. Doesn't know what an app is.
+Media: Watches only live TV news at 9pm, no streaming. Gets most news from neighbors/mosque announcements.
+Buying decisions: Trusts the same shopkeeper she's bought from for 20 years; never shops online.
+Takeaway: Any digital ad campaign targeting her generation through social media would completely miss her — she's only reachable through word-of-mouth or traditional broadcast.
+```
+</script>
+
+<script type="text/markdown" id="md-dmb-brand">
+## Assignment brief (as given)
+
+Write down 5 brands you like (Pakistani or international), and research them — their colors, their positioning/story, what makes their branding work (the lecture uses McDonald's red/yellow as the example). For each, compare it against an equivalent US brand to see what's shared and what's different in approach.
+
+## How to do it
+
+1. List 5 brands you personally like (any industry).
+2. For each, research and note:
+   - Primary brand colors and what mood/association they're going for.
+   - Their core positioning line / tagline / story (what they want you to feel, not just what they sell).
+   - One thing about their branding that clearly works (recognizable logo, consistent color use, a specific emotional hook, etc.).
+3. For at least 2 of the 5, find a comparable US brand in the same category and note what's similar and what's different in how they position themselves.
+
+## Example (illustrative only — not real data)
+
+```
+Brand 1: McDonald's — Red/yellow (appetite + happiness/speed), positioning "fast, familiar, affordable comfort." Works because the color pairing is used with zero deviation across every market.
+US comparison: vs. In-N-Out — simpler red/yellow/white palette, positions on "quality over speed" instead of McDonald's "speed and consistency."
+
+Brand 2: Khaadi — Earth tones + traditional print motifs, positioning "modern Pakistani heritage." Works because the aesthetic signals both "local" and "premium" at once.
+US comparison: vs. Anthropologie — similar "heritage-meets-modern" positioning but through a bohemian American lens rather than regional heritage.
+
+(...3 more brands...)
+```
+</script>
+
+<script type="text/markdown" id="md-dmb-roas">
+## Assignment brief (as given)
+
+A live in-class exercise: the instructor spent Rs 28,624 running a digital marketing session, which had 288 paid attendees at a per-head fee. The point isn't the specific numbers from his session — it's learning to actually do the gross-revenue / ROAS math instead of trusting inflated "50-70% conversion" claims (the lecture explicitly calls those claims false; real conversion is 1-3%, 5% is already good).
+
+## How to do it
+
+Apply the same math to a real campaign or paid activity of your own (or a hypothetical one if you don't have one yet):
+
+1. **Spend**: total amount spent to run the campaign/session (ads, platform fees, etc.).
+2. **Reach**: how many people saw/were exposed to it.
+3. **Conversions**: how many actually paid/signed up/bought.
+4. **Conversion rate** = Conversions ÷ Reach × 100. Sanity-check against realistic benchmarks (1-3% for e-commerce, up to ~5% being strong) — don't accept a number over that without real evidence.
+5. **Revenue per conversion** (fee or price per unit).
+6. **Gross revenue** = Conversions × Revenue per conversion.
+7. **ROAS** (Return on Ad Spend) = Gross revenue ÷ Spend.
+8. **Customer Acquisition Cost (CAC)** = Spend ÷ Conversions.
+
+## Example (illustrative only — not real data)
+
+```
+Spend: Rs 28,624
+Reach: 2,880 people saw the campaign
+Conversions: 288 people paid Rs 500 each
+Conversion rate: 288/2880 = 10% (plausible here since this was a warm existing audience, not cold ads)
+Gross revenue: 288 x 500 = Rs 144,000
+ROAS: 144,000 / 28,624 = ~5.03x
+CAC: 28,624 / 288 = ~Rs 99.4 per paying customer
+```
+</script>
+
+<script type="text/markdown" id="md-fyb-funnel">
+## Assignment brief (as given)
+
+Note: the instructor explicitly says this one is self-directed, not graded — "you do your assignment yourself, it is your benefit." But the lecture's entire content is one concrete, describable exercise worth doing.
+
+Income is water through a 7-stage pipe: **Reach → Fit → Trust → Offer → Close → Deliver → Repeat**. Most people measure only the money coming out the end and never check which single stage is actually the clog. The instructions: build your own funnel with your real numbers at each stage, find the one weakest stage, and work on only that stage for the next 30 days before moving to the next bottleneck.
+
+## How to do it
+
+1. For the last 30-60 days, count your real numbers at each stage:
+   - **Reach** — how many people saw/heard your offer.
+   - **Fit** — of those, how many were even the right audience.
+   - **Trust** — of those, how many engaged/responded with interest.
+   - **Offer** — how many got a concrete price/proposal.
+   - **Close** — how many actually paid/signed.
+   - **Deliver** — of those, how many you successfully delivered to (vs. refunded/abandoned).
+   - **Repeat** — how many became repeat buyers.
+2. Compute the drop-off percentage between each stage.
+3. Identify the single stage with the worst drop-off relative to what's "normal" for your market — that's your bottleneck, not the stage that just "feels" wrong.
+4. Commit to working on only that one stage for the next 30 days; don't try to fix every stage at once.
+
+## Example (illustrative only — not real data)
+
+```
+Reach: 7,000 social messages/month
+Fit: ~2,000 are plausible buyers for my course
+Trust: 400 engage/reply with interest
+Offer: 60 get a direct price quote
+Close: 24 say yes
+Deliver: only 14 successfully delivered (10 dropped due to scheduling/capacity)
+
+Biggest relative drop-off: Close → Deliver (24 → 14, ~42% loss) — this is the real bottleneck, not Reach
+(which looks small in percentage terms but isn't actually where the money is being lost).
+Plan for next 30 days: fix delivery capacity/scheduling before spending any more effort on growing reach.
+```
+</script>
+
+<script type="text/markdown" id="md-aai-agent">
+## Assignment brief (as given)
+
+The instructor's "final challenge": build an AI agent using the tools/frameworks covered in the lecture, and within 30 days get it to bring you **one real, paying customer** — not just a working demo. He claims the build itself only takes about 2 hours once you know the tools; the 30 days is for getting it in front of people and closing one buyer. You also have to document which tools/trainings you used to build it.
+
+## How to do it
+
+1. **Pick one narrow, real problem** you can solve with an agent — not a generic "AI assistant," something specific enough that a stranger would pay for it (e.g. auto-drafting replies to a specific type of inquiry, scraping+summarizing a niche data source, automating a repetitive step in a workflow you already understand).
+2. **Apply the SPAR loop** from the lecture to design it:
+   - **Sense** — what input/trigger does the agent watch (an inbox, a form, a webhook, a schedule)?
+   - **Plan** — what steps does it decide to take given that input?
+   - **Act** — what tool calls / API calls / outputs does it actually produce?
+   - **Reflect** — how does it check its own output before it reaches the customer (a retry, a validation step, a human-in-the-loop check)?
+3. **Build it in ~2 hours**, using whatever no-code/low-code/LLM tooling you're comfortable with (the lecture mentions prompting fundamentals + off-the-shelf LLM tools — you don't need to write a framework from scratch).
+4. **Write down the tools and trainings you used** — a short list (e.g. "ChatGPT API + Zapier + Google Sheets", or "n8n + Claude"), so you (and your coach) can see your actual toolchain, not just the idea.
+5. **Go get one customer within 30 days.** The instructor's claim: if you launch today, you can realistically get your first customer by tomorrow morning if the problem is real and narrow enough. This step is the actual test — a working agent with zero users doesn't count.
+6. **Record the proof**: date you launched, date you got the customer, what they paid (or agreed to pay) and for what.
+
+## Example (illustrative only — not real data)
+
+```
+Agent idea: Auto-summarizes long WhatsApp group chats for small business owners into a daily 5-bullet digest.
+SPAR: Sense = new messages each night at 9pm → Plan = group by topic/sender → Act = generate digest via LLM, send via WhatsApp API → Reflect = flag if digest is empty/too short, re-run.
+Tools used: WhatsApp Business API, OpenAI API, a simple Google Apps Script scheduler.
+Build time: ~2.5 hours.
+Launch date: 2026-09-02.
+First customer: 2026-09-10 — a local tutoring center owner agreed to pay Rs 1,500/month to stop reading 40 messages a night.
+```
+</script>
+
+<script type="text/markdown" id="md-mam-cashflow">
+## Assignment brief (as given)
+
+For the next 7 days, write down every rupee your family spends and *who* it goes to — the vegetable vendor, Netflix, Amazon, the milkman, everyone. The point: money is already flowing in predictable "rivers" (recurring categories of spend — tuition, weddings, mobile data, visa agents, medicines, school fees, etc.). You don't need to invent a new river; you need to find out which existing, already-flowing river you could stand in and sell into.
+
+## How to do it
+
+1. For 7 consecutive days, log every outgoing payment your household makes: amount, recipient/category, and whether it's recurring or one-off.
+2. At the end of the week, group the entries into categories (food, subscriptions, education, transport, services, etc.) and total each.
+3. Identify the 2-3 largest or most recurring "rivers" — these are categories where money is reliably flowing whether you participate or not.
+4. Ask: could I position a product/service to sell into one of these existing rivers, instead of creating a brand-new, untested demand?
+
+## Example (illustrative only — not real data)
+
+```
+Day 1: Rs 1,200 — vegetable vendor (recurring, daily)
+Day 1: Rs 650 — Netflix subscription (recurring, monthly)
+Day 2: Rs 3,400 — Amazon order (clothing)
+Day 3: Rs 2,000 — tuition academy fee (recurring, monthly)
+Day 4: Rs 900 — mobile data top-up (recurring, weekly)
+...
+Largest recurring rivers: tuition/education (~Rs 8,000/mo), food delivery/vendors (~Rs 9,000/mo), subscriptions (~Rs 2,500/mo).
+Opportunity: Education is the biggest, steadiest river in my own household — worth exploring a tutoring/content side-service into that same river rather than starting something unrelated.
+```
+</script>
+
+<script type="text/markdown" id="md-mam-advantage">
+## Assignment brief (as given)
+
+Write down your **five unfair advantages** — your "moat." An unfair advantage is something you already hold that a stranger would need years to acquire: a language, an inherited trade network, a family trust relationship, a skill you picked up without trying, a location-specific connection. The lecture's own examples: knowing Urdu/English/Arabic already, a mother who can cook for 30 people without breaking a sweat, a father trusted by every shopkeeper on the street, a relative who runs a factory, years of reading books that make writing/teaching effortless.
+
+The instructor's own answer: health was never his advantage — reading was. The point isn't to force a dramatic answer; it's to notice what's already frictionless for you that isn't frictionless for most people.
+
+## How to do it
+
+1. List things that come easily to you that you've seen other people struggle with (skills, languages, stamina, specific knowledge).
+2. List people/relationships in your family or network who already have trust, access, or a trade built up over years (their advantage becomes partially yours).
+3. List anything inherited — land, a shop, a reputation, a trade connection, a craft.
+4. Narrow to the 5 strongest — the ones that would take a stranger years, not weeks, to replicate.
+
+## Example (illustrative only — not real data)
+
+```
+1. Fluent in Urdu, English, and conversational Arabic — lets me serve 3 separate client markets others can't reach directly.
+2. My father has run a hardware shop in the same market for 25 years — instant trust/access with suppliers if I ever need sourcing.
+3. I've written technical documentation for 6 years — writing/explaining things clearly is now effortless for me, most peers find it draining.
+4. My cousin runs a small logistics company in Lahore — gives me a built-in shipping/fulfillment contact most competitors would have to cold-find.
+5. I grew up partly in Karachi and partly in Dubai — I read both markets' buyer psychology without having to study it.
+```
+</script>
+
+<script type="text/markdown" id="md-mam-pain">
+## Assignment brief (as given)
+
+Ask 20 people what they don't like in their daily life — their pain points. The lecture's examples: hating crowded markets, not getting fresh vegetables, a solar panel installer who disappeared after the first rain so now the panels aren't being cleaned/charged, a landlord who never gets rent on time. The instructor's rule: price and margin track pain, not cost — "margin is related to the pain, how much pain is there," not how much something costs to produce. Every genuine complaint is a sellable opportunity.
+
+## How to do it
+
+1. Ask at least 20 different people (friends, family, neighbors, coworkers — real variety, not 20 people from the same household) one simple question: "What's something that annoys you or doesn't work well in your daily life?"
+2. Write down each answer verbatim, don't editorialize yet.
+3. Once you have 20, group recurring themes.
+4. For your top 2-3 recurring pain points, note who would pay to make the pain go away, and roughly how much pain (urgency/frequency) is involved — this is what sets the price ceiling, not your cost to deliver it.
+
+## Example (illustrative only — not real data)
+
+```
+1. "Grocery delivery apps never have fresh produce in stock by evening."
+2. "I can never find a reliable AC technician who shows up on time."
+3. "My kid's school fee payment portal crashes every due date."
+...
+17. "Landlord takes 2 weeks to fix anything broken in the flat."
+18. "No one delivers prescription medicine reliably after 9pm."
+19. "Car mechanics always upsell repairs I didn't ask for."
+20. "Can't find a trustworthy tutor for O-level math on short notice."
+
+Recurring theme: reliability/trust gap in home-services (AC repair, landlord fixes, medicine delivery) — 3 of 20 independently
+mentioned a "no-show" or "can't trust the provider" pain, which is high-frequency and high-urgency → strong pricing power.
+```
+</script>
+
+<script type="text/markdown" id="md-htgaj-urdu">
+## Assignment brief (as given)
+
+The instructor's first and most important exercise, given before anything else in the session: forget trying to find a job for a moment, and write a CV of yourself **in Urdu — not English**. Keep it to 1-2 pages. Then read it back yourself and ask honestly: would you hire this person? Writing in Urdu instead of your usual English forces you to actually think about what you know and don't know, and how you genuinely express yourself, instead of hiding behind polished English phrasing you may have copied from a template.
+
+## How to do it
+
+1. Open a blank document (or a plain notebook page) and write your own CV **entirely in Urdu** — no English words, no copy-pasting from your existing English CV.
+2. Cover the same ground a normal CV would — who you are, what you've actually done, what you're good at — but in your own words, as if explaining yourself to a relative who's never seen your CV.
+3. Keep it to 1-2 pages. If you're struggling to fill even one, that's information too.
+4. Read it back as if you were a stranger hiring for a role: would you hire this person based only on what's on the page?
+5. Write down at least two things the exercise revealed — one thing you were able to describe more clearly in Urdu than you expected, and one thing you realized you don't actually know how to explain (in either language).
+6. Optional: once you've done this honestly, use it as raw material to rewrite your real English CV with the same honesty.
+
+## Example (illustrative structure only — write the actual content in your own Urdu)
+
+```
+Urdu CV (1-2 pages) — section outline, not literal text:
+1. Apna taaruf — kaun hain, kya karte hain, kahaan se hain.
+2. Kaam ka tajurba — har job/role mein asal mein kya kiya, kya natija nikla.
+3. Khaas mahaarat — jo cheezein waqai aati hain, jhooti list nahi.
+4. Aglay qadam — ab kya karna chahte hain.
+
+What the exercise revealed (example, illustrative only):
+- Could explain clearly: My actual day-to-day work at my last job — writing it in Urdu stripped
+  away the corporate-English jargon I'd been hiding behind, and the plain description was
+  more impressive than the jargon version.
+- Couldn't explain well: When I got to "what I actually want to do next," I realized I've never
+  stated it in one clear sentence, in either language.
+```
+</script>
+
+<script type="text/markdown" id="md-htgaj-mistakes">
+## Assignment brief (as given)
+
+Drawing on roughly 257,000 real Pakistani CVs reviewed through the instructor's platforms, he lists the mistakes that kill a candidate's chances before anyone even reads the content — he calls them the "lethal common mistakes" that cut your odds by up to 90%:
+
+1. **Spelling and grammar errors** — including in section headers and job titles themselves.
+2. **Image-file CVs** — a CV scanned or photocopied and uploaded as an image/PDF-of-an-image instead of real text. Applicant Tracking System (ATS) software can't read it at all, so it's silently discarded no matter how good the content is.
+3. **Exaggerated or false claims** — skills listed with no real proficiency behind them, experience durations that don't add up, achievements that don't hold up under a follow-up question.
+4. **Irrelevant personal details** — photos, father's name, CNIC/ID number, marital status, full home address. None of it is job-relevant, and some of it invites bias.
+5. **Wrong length** — a one-page CV is right for early-career; 2-3 pages for mid-career; the instructor cites real examples of 40-page CVs that get discarded on length alone.
+6. **Wrong or dead contact information** — an email with a typo, a phone number that's actually a relative's.
+7. **Slow response time** — replying to an interview invitation after days or weeks, by which point the role is filled.
+
+## How to do it
+
+Pull up your actual current CV and audit it line by line against each category above:
+
+1. **Format check** — is it a real text-based PDF/Word file, not a scanned image or screenshot? Try selecting and copying a sentence out of it — if you can't, an ATS can't read it either.
+2. **Spelling & grammar check** — run it through a spell/grammar checker (or a careful manual read); list every mistake found, including in headers and titles.
+3. **Honesty check** — go bullet by bullet and confirm you could defend every skill/claim under direct follow-up questions in an interview.
+4. **Personal-details check** — remove anything that isn't job-relevant: photo, father's name, CNIC/ID number, marital status, full home address.
+5. **Length check** — confirm it matches your actual career stage (1 page early-career, 2-3 pages mid-career); if it's running long, cut duties and keep only results.
+6. **Contact-info check** — right now, call your own listed phone number and send a test email to your own listed address, to confirm both actually reach you.
+7. **Response-time check** — note your realistic turnaround time for replying to a recruiter message today; if it's not same-day, fix your notification settings so it can be.
+
+## Example (illustrative only — not real data)
+
+```
+Format: Real text-based PDF exported from Word — passed (text is selectable).
+Spelling/grammar: Found 3 errors — "Recieved" → "Received", a missing comma in the
+   summary line, and the job title "Markting Manager" (typo in my own current title!).
+Honesty: One bullet claimed "proficient in Python" — on reflection I can read/edit scripts
+   but couldn't write one from scratch in an interview; reworded to "working knowledge of Python
+   for data cleanup."
+Personal details: Removed photo, father's name, CNIC number, marital status, and full home
+   address (kept only city).
+Length: 3 pages for 6 years of experience — trimmed to 2 by cutting duty-style bullets with
+   no result attached.
+Contact info: Phone number had a typo (one digit wrong) — caught it only by calling it myself.
+Response time: Historically ~4-5 days to reply to LinkedIn messages — turned on push
+   notifications for LinkedIn and email to get this to same-day.
+```
+</script>
+
+<script type="text/markdown" id="md-htgaj-sprint">
+## Assignment brief (as given)
+
+The instructor's concrete job-hunting tactics, consolidated into one sprint:
+
+1. **LinkedIn search hacks** — search roles with "Pakistan" or "worldwide/United States" in the location field to surface companies that already hire remotely into Pakistan; search "Urdu" for US-based roles that need Urdu speakers (insurance, immigration/community-support services); search "#hiring" to find people actively posting openings in your own network; set your profile to **Open to Work** and confirm your phone/email contact info is actually visible and correct on your profile.
+2. **AI tool stack** — set up a profile on an ATS/resume-scoring tool to catch spelling and formatting issues an ATS would reject; set up a profile on a salary-benchmarking tool to know your realistic market rate in your target country; try an auto-apply agent that matches and applies to jobs on your behalf (the instructor's own result using one: 25-26 applications → 13 interview calls in a week).
+3. **Daily routine** — commit one real hour a day to job hunting: pick 3 target job titles, research which companies are hiring for them, send out a customized (not copy-pasted) CV and cover letter for each application.
+4. **Headhunters & recruiters** — submit your CV directly to recruitment/headhunter firms, especially for roles in Canada, the US, and other western markets; for remote-specific roles, submit to remote-job platforms and recruiters that specialize in placing people remotely.
+5. **Networking** — reach out to at least one person a week with no ask attached (just build the relationship — a short call, a coffee/tea invite) instead of only messaging people when you need something from them; ask 2-3 people who've actually worked with you for a written LinkedIn recommendation.
+6. **Fractional / part-time / volunteer roles** — apply to at least one part-time, fractional, volunteer, or board-advisor role even if unpaid or low-paid; the instructor's claim is these often convert into full-time offers within 2-3 months once you're already "in" with the company.
+
+## How to do it
+
+Treat this as a 30-day checklist, logging real dates as you go — not a one-time setup:
+
+| Task | Frequency | Done when |
+|---|---|---|
+| LinkedIn search hacks set up | once | Saved searches for "Pakistan"/"worldwide" location + "Urdu" + "#hiring"; profile set to Open to Work; contact info verified visible |
+| ATS/resume-scoring tool profile | once | Account created, CV scored, issues fixed |
+| Salary-benchmarking tool profile | once | Account created, realistic target salary/rate noted |
+| Auto-apply agent trial | once | Account created, CV uploaded, first batch of applications sent |
+| Daily 1-hour job hunt | ~22-26 of 30 days | Logged (even just a tally), with 3 target titles named up front |
+| Headhunter/recruiter CV submissions | 3-5 firms | Each one submitted, note which responded |
+| No-ask networking contact | 4x over 30 days | One person each week, logged who and how |
+| LinkedIn recommendation requests | 2-3 people | Each one asked, note who responded |
+| Fractional/part-time/volunteer application | at least 1 | Applied, note outcome |
+
+## Example (illustrative only — not real data)
+
+```
+LinkedIn hacks: Saved searches set up 2026-10-05 for "data analyst" + location "Pakistan" and
+  "worldwide"; profile set to Open to Work; verified phone/email visible.
+ATS tool: Signed up 2026-10-05, CV scored 62/100, fixed 4 flagged formatting issues, rescored 88/100.
+Salary tool: Signed up 2026-10-06, realistic US remote target for my role: $45,000-55,000/year.
+Auto-apply agent: Signed up 2026-10-07, uploaded CV, 24 applications sent by 2026-10-14, 6 interview
+  requests so far.
+Daily 1-hour job hunt: logged ~24 of 30 days. 3 target titles: Data Analyst, BI Analyst, Reporting
+  Analyst.
+Headhunter submissions: 4 firms — 1 responded requesting a call.
+Networking: Week 1 — former manager (coffee chat); Week 2 — university friend now at a target
+  company; Week 3 — LinkedIn 2nd-degree contact in same field; Week 4 — former client.
+Recommendation requests: asked 3, 2 responded by day 30.
+Fractional/volunteer: Applied to a part-time fractional analyst role on 2026-10-10, pending response.
+```
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/11.1.1/marked.min.js"></script>
+<script>
+(function(){
+  function start(hot){
+    hot = hot || {};
+    var STORE_KEY = 'gkmba-tracker-progress-v1';
+    var state = hot.progress || {};
+    try{
+      if(!hot.progress){
+        var raw = localStorage.getItem(STORE_KEY);
+        state = raw ? JSON.parse(raw) : {};
+      }
+    }catch(e){ state = state || {}; }
+
+    function save(){
+      try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){}
+      try{ window.claude && window.claude.hot && window.claude.hot.snapshot && window.claude.hot.snapshot({progress: state}); }catch(e){}
+    }
+
+    // render markdown into each assignment body, once, up front
+    document.querySelectorAll('.a-body').forEach(function(el){
+      var srcId = el.getAttribute('data-md');
+      var src = document.getElementById(srcId);
+      if(!src) return;
+      var html = '';
+      try{ html = marked.parse(src.textContent); }catch(e){ html = '<p>'+src.textContent+'</p>'; }
+      el.innerHTML = html;
+      el.querySelectorAll('table').forEach(function(t){
+        var wrap = document.createElement('div');
+        wrap.className = 'table-wrap';
+        t.parentNode.insertBefore(wrap, t);
+        wrap.appendChild(t);
+      });
+    });
+
+    // apply saved checkbox state
+    document.querySelectorAll('details.assignment').forEach(function(d){
+      var id = d.getAttribute('data-id');
+      var chk = d.querySelector('.chk');
+      if(state[id]){ chk.checked = true; d.setAttribute('data-done','1'); }
+    });
+
+    function countsFor(scope){
+      var boxes = scope.querySelectorAll('.chk');
+      var total = boxes.length, done = 0;
+      boxes.forEach(function(b){ if(b.checked) done++; });
+      return {done: done, total: total};
+    }
+
+    function updateAll(){
+      // per-week
+      document.querySelectorAll('details.week').forEach(function(w){
+        var c = countsFor(w);
+        var badge = w.querySelector(':scope > summary [data-role="progress"]');
+        if(badge) badge.textContent = c.done + '/' + c.total;
+      });
+      // per-module stat cards + overall
+      var statsRow = document.getElementById('stats-row');
+      statsRow.innerHTML = '';
+      var modules = [
+        {id:'module-who', label:'Who Are You?'},
+        {id:'module-package', label:'Package Yourself'},
+        {id:'module-monetize', label:'Monetize & Multiply'}
+      ];
+      var overallDone = 0, overallTotal = 0;
+      modules.forEach(function(m){
+        var sec = document.getElementById(m.id);
+        var c = countsFor(sec);
+        overallDone += c.done; overallTotal += c.total;
+        var pct = c.total ? Math.round(100*c.done/c.total) : 0;
+        var a = document.createElement('a');
+        a.className = 'stat-card';
+        a.href = '#'+m.id;
+        a.innerHTML = '<span class="stat-label">'+m.label+'</span><span class="stat-frac">'+c.done+' / '+c.total+'</span><div class="stat-bar"><i style="width:'+pct+'%"></i></div>';
+        statsRow.appendChild(a);
+      });
+      var overallPct = overallTotal ? Math.round(100*overallDone/overallTotal) : 0;
+      var overallCard = document.createElement('div');
+      overallCard.className = 'stat-card';
+      overallCard.innerHTML = '<span class="stat-label">Overall</span><span class="stat-frac">'+overallDone+' / '+overallTotal+'</span><div class="stat-bar"><i style="width:'+overallPct+'%"></i></div>';
+      statsRow.insertBefore(overallCard, statsRow.firstChild);
+    }
+
+    document.querySelectorAll('.chk').forEach(function(chk){
+      chk.addEventListener('click', function(e){ e.stopPropagation(); });
+      chk.addEventListener('change', function(){
+        var d = chk.closest('details.assignment');
+        var id = d.getAttribute('data-id');
+        state[id] = chk.checked;
+        d.setAttribute('data-done', chk.checked ? '1' : '0');
+        save();
+        updateAll();
+      });
+    });
+
+    var resetBtn = document.getElementById('reset-btn');
+    var resetArmed = false, resetTimer;
+    resetBtn.addEventListener('click', function(){
+      if(!resetArmed){
+        resetArmed = true;
+        resetBtn.textContent = 'Click again to confirm';
+        resetTimer = setTimeout(function(){ resetArmed = false; resetBtn.textContent = 'Clear my checkmarks'; }, 3000);
+        return;
+      }
+      clearTimeout(resetTimer);
+      resetArmed = false;
+      resetBtn.textContent = 'Clear my checkmarks';
+      state = {};
+      save();
+      document.querySelectorAll('.chk').forEach(function(c){ c.checked = false; });
+      document.querySelectorAll('details.assignment').forEach(function(d){ d.setAttribute('data-done','0'); });
+      updateAll();
+    });
+
+    updateAll();
+  }
+  if(window.claude && window.claude.hot && window.claude.hot.ready){
+    window.claude.hot.ready(start);
+  } else {
+    start(window.claude && window.claude.hot && window.claude.hot.data);
+  }
+})();
+</script>
+
+</body></html>
