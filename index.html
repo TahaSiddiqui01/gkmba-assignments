@@ -96,13 +96,35 @@
   .page-foot{margin-top:48px;padding-top:18px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--fg-muted)}
   .reset-btn{font:inherit;font-size:12.5px;background:none;border:1px solid var(--border);color:var(--fg-muted);border-radius:7px;padding:6px 10px;cursor:pointer}
   .reset-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+  .src-tag{font-family:var(--font-mono);font-size:10px;letter-spacing:.03em;text-transform:uppercase;border-radius:5px;padding:2px 6px;flex-shrink:0;align-self:flex-start;margin-top:3px}
+  .src-tag.src-video{background:var(--accent-soft);color:var(--accent)}
+  .src-tag.src-portal{background:var(--surface);border:1px solid var(--border);color:var(--fg-muted)}
+
+  .filter-tabs{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+  .filter-note{font-size:12px;color:var(--fg-muted);max-width:60ch;margin-top:8px}
+  .filter-tab{font:inherit;font-size:13px;background:var(--surface);border:1px solid var(--border);color:var(--fg-muted);border-radius:8px;padding:7px 12px;cursor:pointer}
+  .filter-tab:hover{border-color:var(--accent)}
+  .filter-tab[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-fg);font-weight:600}
+
+  body[data-filter="video"] #module-portal{display:none}
+  body[data-filter="portal"] #module-who,
+  body[data-filter="portal"] #module-package,
+  body[data-filter="portal"] #module-monetize{display:none}
 </style>
 
 <header class="page-head">
   <p class="eyebrow">GKMBA · Fellow Resource</p>
   <h1>Assignment Tracker</h1>
-  <p class="lede">All 41 assignments from the GKMBA course, in the exact week-by-week order they were taught. Each one carries the full brief and how-to-do-it instructions — no due dates, no personal answers.</p>
+  <p class="lede">All 78 assignments from the GKMBA course (41 from the recorded lectures, 37 bonus ones from the course portal), in the exact week-by-week order they were taught. Each one carries the full brief and how-to-do-it instructions — no due dates, no personal answers.</p>
   <p class="privacy-note"><strong>Your checkmarks are private.</strong> They save only in this browser, on this device — never sent anywhere, and never visible to anyone else who opens this page, including whoever shared it with you.</p>
+  <div class="filter-tabs" role="tablist" aria-label="Filter assignments by source">
+    <button type="button" class="filter-tab" data-filter="all" aria-pressed="true">All (78)</button>
+    <button type="button" class="filter-tab" data-filter="video" aria-pressed="false">From Video (41)</button>
+    <button type="button" class="filter-tab" data-filter="portal" aria-pressed="false">From Portal (37)</button>
+  </div>
+  <p class="filter-note">The portal lists 50 assignments; 37 appear here. The other 13 are already covered: 7 duplicate a video-based assignment above, and 6 are repeat copies of the same weekly Astaghfar Count (one template folder stands in for all of them).</p>
+
   <div class="stats" id="stats-row"></div>
 </header>
 
@@ -126,23 +148,23 @@
     <div class="week-body">
       <div class="assignment-list">
         <details class="assignment" data-id="know-yourself-skills-inventory-and-matrix">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Know Yourself — Skills Inventory &amp; Skill Matrix</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Know Yourself — Skills Inventory &amp; Skill Matrix</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-kyo-skills"></div>
         </details>
         <details class="assignment" data-id="know-yourself-hourly-rate-calculation">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Know Yourself — Effective Hourly Rate</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Know Yourself — Effective Hourly Rate</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-kyo-hourly"></div>
         </details>
         <details class="assignment" data-id="know-yourself-personal-economy-stage">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Know Yourself — Personal Economy Pyramid Stage</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Know Yourself — Personal Economy Pyramid Stage</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-kyo-economy"></div>
         </details>
         <details class="assignment" data-id="know-yourself-reputation-and-visibility-audit">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Know Yourself — Reputation &amp; Visibility Audit</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Know Yourself — Reputation &amp; Visibility Audit</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-kyo-reputation"></div>
         </details>
         <details class="assignment" data-id="know-yourself-weekly-action-tasks">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Know Yourself — Weekly Action Tasks</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Know Yourself — Weekly Action Tasks</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-kyo-weekly"></div>
         </details>
       </div>
@@ -163,7 +185,7 @@
       <ul class="no-assignment-list"><li><span class="tag">no assignment</span>Thak Gaye Ho Na!</li></ul>
       <div class="assignment-list">
         <details class="assignment" data-id="W02-A01-the-loop-map">
-          <summary><input type="checkbox" class="chk"><span class="a-title">The Loop Map</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">The Loop Map</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-loopmap"></div>
         </details>
       </div>
@@ -183,23 +205,23 @@
     <div class="week-body">
       <div class="assignment-list">
         <details class="assignment" data-id="how-to-be-future-proof-automation-exposure-audit">
-          <summary><input type="checkbox" class="chk"><span class="a-title">How to Be Future-Proof — Automation Exposure Audit</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Be Future-Proof — Automation Exposure Audit</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-fp-automation"></div>
         </details>
         <details class="assignment" data-id="how-to-be-future-proof-green-red-box">
-          <summary><input type="checkbox" class="chk"><span class="a-title">How to Be Future-Proof — Green Box / Red Box</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Be Future-Proof — Green Box / Red Box</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-fp-greenred"></div>
         </details>
         <details class="assignment" data-id="how-to-be-future-proof-job-description-gap-analysis">
-          <summary><input type="checkbox" class="chk"><span class="a-title">How to Be Future-Proof — Job Description Gap Analysis</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Be Future-Proof — Job Description Gap Analysis</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-fp-jobgap"></div>
         </details>
         <details class="assignment" data-id="relationship-management-father-appreciation-exercise">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Relationship Management — Father Appreciation Exercise</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Relationship Management — Father Appreciation Exercise</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-rm-father"></div>
         </details>
         <details class="assignment" data-id="relationship-management-household-budget-audit">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Relationship Management — Household Budget Audit</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Relationship Management — Household Budget Audit</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-rm-household"></div>
         </details>
       </div>
@@ -220,19 +242,19 @@
       <ul class="no-assignment-list"><li><span class="tag">no assignment</span>Guest Lecture — Rehan Allahwala</li></ul>
       <div class="assignment-list">
         <details class="assignment" data-id="inherited-scarcity-movie-reflection">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Inherited Scarcity — Movie Reflection</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Inherited Scarcity — Movie Reflection</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-is-movie"></div>
         </details>
         <details class="assignment" data-id="inherited-scarcity-money-rules-audit">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Inherited Scarcity — Money Rules Audit</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Inherited Scarcity — Money Rules Audit</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-is-rules"></div>
         </details>
         <details class="assignment" data-id="how-to-design-profitable-life-five-dimension-score">
-          <summary><input type="checkbox" class="chk"><span class="a-title">How to Design a Profitable Life — Five-Dimension Score</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Design a Profitable Life — Five-Dimension Score</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-dpl-five"></div>
         </details>
         <details class="assignment" data-id="how-to-design-profitable-life-personal-balance-sheet">
-          <summary><input type="checkbox" class="chk"><span class="a-title">How to Design a Profitable Life — Personal Balance Sheet</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Design a Profitable Life — Personal Balance Sheet</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-dpl-balance"></div>
         </details>
       </div>
@@ -259,19 +281,19 @@
       <ul class="no-assignment-list"><li><span class="tag">no assignment</span>Guest Lecture — Asim Maharwi</li></ul>
       <div class="assignment-list">
         <details class="assignment" data-id="how-to-sell-yourself-cv-rewrite">
-          <summary><input type="checkbox" class="chk"><span class="a-title">How to Sell Yourself — CV Rewrite</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Sell Yourself — CV Rewrite</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-sy-cv"></div>
         </details>
         <details class="assignment" data-id="how-to-sell-yourself-60-second-pitch-video">
-          <summary><input type="checkbox" class="chk"><span class="a-title">How to Sell Yourself — 60-Second Pitch Video</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Sell Yourself — 60-Second Pitch Video</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-sy-pitch"></div>
         </details>
         <details class="assignment" data-id="how-to-sell-yourself-30-day-visibility-plan">
-          <summary><input type="checkbox" class="chk"><span class="a-title">How to Sell Yourself — 30-Day Visibility Plan</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Sell Yourself — 30-Day Visibility Plan</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-sy-visibility"></div>
         </details>
         <details class="assignment" data-id="financial-literacy-budget-and-income-tracking">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Financial Literacy — Budget &amp; Income Tracking</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Financial Literacy — Budget &amp; Income Tracking</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-fl-budget"></div>
         </details>
       </div>
@@ -296,15 +318,15 @@
       </ul>
       <div class="assignment-list">
         <details class="assignment" data-id="how-to-decide-movie-trap-analysis">
-          <summary><input type="checkbox" class="chk"><span class="a-title">How to Decide — Movie Trap Analysis</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Decide — Movie Trap Analysis</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-htd-movie"></div>
         </details>
         <details class="assignment" data-id="how-to-decide-decision-options-worksheet">
-          <summary><input type="checkbox" class="chk"><span class="a-title">How to Decide — Decision Options Worksheet</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Decide — Decision Options Worksheet</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-htd-options"></div>
         </details>
         <details class="assignment" data-id="science-of-money-income-asset-ledger">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Science of Money — Income, Asset &amp; Liability Ledger</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Science of Money — Income, Asset &amp; Liability Ledger</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-som-ledger"></div>
         </details>
       </div>
@@ -325,11 +347,11 @@
       <ul class="no-assignment-list"><li><span class="tag">no assignment</span>Guest Lecture — Dr Shahid Qureshi</li></ul>
       <div class="assignment-list">
         <details class="assignment" data-id="skills-arbitrage-package-and-sell">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Skills Arbitrage — Package and Sell Your "Samosa"</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Skills Arbitrage — Package and Sell Your "Samosa"</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-sa-samosa"></div>
         </details>
         <details class="assignment" data-id="how-to-earn-money-100-income-platforms">
-          <summary><input type="checkbox" class="chk"><span class="a-title">How to Earn Money — 100 Income Platforms Audit</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Earn Money — 100 Income Platforms Audit</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-hem-platforms"></div>
         </details>
       </div>
@@ -350,15 +372,15 @@
       <ul class="no-assignment-list"><li><span class="tag">no assignment</span>Earn Extra Income</li></ul>
       <div class="assignment-list">
         <details class="assignment" data-id="getting-paid-across-borders-hire-or-mentor-a-peer">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Getting Paid Across Borders — Hire or Mentor a Peer</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Getting Paid Across Borders — Hire or Mentor a Peer</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-gpb-mentor"></div>
         </details>
         <details class="assignment" data-id="getting-paid-across-borders-gkmba-feedback-reel">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Getting Paid Across Borders — GKMBA Feedback Reel</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Getting Paid Across Borders — GKMBA Feedback Reel</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-gpb-reel"></div>
         </details>
         <details class="assignment" data-id="how-lucky-are-you-privilege-self-check">
-          <summary><input type="checkbox" class="chk"><span class="a-title">How Lucky Are You — Privilege Self-Check</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">How Lucky Are You — Privilege Self-Check</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-hla-check"></div>
         </details>
       </div>
@@ -379,15 +401,15 @@
       <ul class="no-assignment-list"><li><span class="tag">no assignment</span>Guest Lecture — Malik Ahmad Jalal</li></ul>
       <div class="assignment-list">
         <details class="assignment" data-id="prisoners-of-geography-location-audit">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Prisoners of Geography — The Location Audit</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Prisoners of Geography — The Location Audit</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-pog-location"></div>
         </details>
         <details class="assignment" data-id="prisoners-of-geography-relocation-decision-memo">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Prisoners of Geography — Career-Path Letter &amp; Relocation Memo</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Prisoners of Geography — Career-Path Letter &amp; Relocation Memo</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-pog-relocation"></div>
         </details>
         <details class="assignment" data-id="money-stress-financial-situation-audit-and-family-budget">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Money Stress — Financial Situation Audit &amp; Family Budget Meeting</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Money Stress — Financial Situation Audit &amp; Family Budget Meeting</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-ms-audit"></div>
         </details>
       </div>
@@ -414,15 +436,15 @@
       <ul class="no-assignment-list"><li><span class="tag">no assignment</span>Guest Lecture — Dr. Adnan Masood</li></ul>
       <div class="assignment-list">
         <details class="assignment" data-id="digital-marketing-blueprint-generational-interview">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Digital Marketing Blueprint — Generational Interview</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Digital Marketing Blueprint — Generational Interview</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-dmb-interview"></div>
         </details>
         <details class="assignment" data-id="digital-marketing-blueprint-brand-comparison">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Digital Marketing Blueprint — Brand Comparison</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Digital Marketing Blueprint — Brand Comparison</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-dmb-brand"></div>
         </details>
         <details class="assignment" data-id="digital-marketing-blueprint-campaign-gross-roas">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Digital Marketing Blueprint — Campaign Gross / ROAS Calculation</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Digital Marketing Blueprint — Campaign Gross / ROAS Calculation</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-dmb-roas"></div>
         </details>
       </div>
@@ -446,11 +468,11 @@
       </ul>
       <div class="assignment-list">
         <details class="assignment" data-id="find-your-bottleneck-funnel-map">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Find Your Bottleneck — Map Your Funnel</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Find Your Bottleneck — Map Your Funnel</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-fyb-funnel"></div>
         </details>
         <details class="assignment" data-id="agentic-ai-build-and-launch-an-agent">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Agentic AI — Build and Launch an Agent (30-Day Challenge)</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Agentic AI — Build and Launch an Agent (30-Day Challenge)</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-aai-agent"></div>
         </details>
       </div>
@@ -470,27 +492,27 @@
     <div class="week-body">
       <div class="assignment-list">
         <details class="assignment" data-id="make-a-million-cashflow-tracking">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Make a Million — 7-Day Family Cash-Flow Tracking</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Make a Million — 7-Day Family Cash-Flow Tracking</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-mam-cashflow"></div>
         </details>
         <details class="assignment" data-id="make-a-million-unfair-advantage-audit">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Make a Million — Unfair Advantage (Moat) Audit</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Make a Million — Unfair Advantage (Moat) Audit</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-mam-advantage"></div>
         </details>
         <details class="assignment" data-id="make-a-million-pain-point-audit">
-          <summary><input type="checkbox" class="chk"><span class="a-title">Make a Million — Pain Point Audit (Ask 20 People)</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">Make a Million — Pain Point Audit (Ask 20 People)</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-mam-pain"></div>
         </details>
         <details class="assignment" data-id="how-to-get-a-job-urdu-cv-exercise">
-          <summary><input type="checkbox" class="chk"><span class="a-title">How to Get a Job — Write Your CV in Urdu</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Get a Job — Write Your CV in Urdu</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-htgaj-urdu"></div>
         </details>
         <details class="assignment" data-id="how-to-get-a-job-cv-mistakes-audit">
-          <summary><input type="checkbox" class="chk"><span class="a-title">How to Get a Job — CV Lethal Mistakes Audit</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Get a Job — CV Lethal Mistakes Audit</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-htgaj-mistakes"></div>
         </details>
         <details class="assignment" data-id="how-to-get-a-job-job-hunt-sprint">
-          <summary><input type="checkbox" class="chk"><span class="a-title">How to Get a Job — 30-Day Job Hunt Sprint</span><span class="chev">⌄</span></summary>
+          <summary><input type="checkbox" class="chk"><span class="a-title">How to Get a Job — 30-Day Job Hunt Sprint</span><span class="src-tag src-video">Video</span><span class="chev">⌄</span></summary>
           <div class="a-body" data-md="md-htgaj-sprint"></div>
         </details>
       </div>
@@ -500,10 +522,229 @@
   <p class="locked-note">Closing module is locked until Oct 17, 2026, 8:00 PM — no assignment posted yet. This page will need a Week 13 section added once it unlocks.</p>
 </section>
 
+
+<section class="module" id="module-portal">
+  <p class="module-eyebrow">Bonus</p>
+  <h2 class="module-title">From the Course Portal</h2>
+  <p class="module-sub">37 more assignments posted on the GKMBA portal that weren’t part of any recorded lecture, optional and not required to follow the video-based assignments above in order.</p>
+
+  <details class="week" data-week="W2">
+    <summary>
+      <span class="week-num" style="font-size:11px">W2</span>
+      <div class="week-head-text">
+        <span class="week-name">Week 2 — More Assignments</span>
+        <span class="week-lessons">W02-A02 to A07, #NoReels Pledge, Mujhe Job Chahiye, Thak Gaye Ho Na session</span>
+      </div>
+      <span class="week-progress" data-role="progress">0/9</span>
+      <span class="chev">⌄</span>
+    </summary>
+    <div class="week-body">
+      <div class="assignment-list">
+        <details class="assignment" data-id="po-w02-a02-the-interest-audit">
+          <summary><input type="checkbox" class="chk"><span class="a-title">W02-A02 | The Interest Audit</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-w02a02"></div>
+        </details>
+        <details class="assignment" data-id="po-w02-a03-the-reserve-line">
+          <summary><input type="checkbox" class="chk"><span class="a-title">W02-A03 | The Reserve Line</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-w02a03"></div>
+        </details>
+        <details class="assignment" data-id="po-w02-a04-one-conversation">
+          <summary><input type="checkbox" class="chk"><span class="a-title">W02-A04 | One Conversation</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-w02a04"></div>
+        </details>
+        <details class="assignment" data-id="po-w02-a05-one-circle-move">
+          <summary><input type="checkbox" class="chk"><span class="a-title">W02-A05 | One Circle Move</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-w02a05"></div>
+        </details>
+        <details class="assignment" data-id="po-w02-a06-the-record-file">
+          <summary><input type="checkbox" class="chk"><span class="a-title">W02-A06 | The Record File</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-w02a06"></div>
+        </details>
+        <details class="assignment" data-id="po-w02-a07-get-paid-again">
+          <summary><input type="checkbox" class="chk"><span class="a-title">W02-A07 | Get Paid Again</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-w02a07"></div>
+        </details>
+        <details class="assignment" data-id="po-w02-noreels-pledge">
+          <summary><input type="checkbox" class="chk"><span class="a-title">W02 #NoReels Pledge</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-noreels"></div>
+        </details>
+        <details class="assignment" data-id="po-w02-mujhe-job-chahiye-get-the-book">
+          <summary><input type="checkbox" class="chk"><span class="a-title">W02 Mujhe Job Chahiye | Get the Book</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-mujhe"></div>
+        </details>
+        <details class="assignment" data-id="po-thak-gaye-ho-na-session-lessons-learned">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Thak Gaye Ho Na Session - Leassons Learned</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-thaksession"></div>
+        </details>
+      </div>
+    </div>
+  </details>
+
+  <details class="week" data-week="GL">
+    <summary>
+      <span class="week-num" style="font-size:11px">GL</span>
+      <div class="week-head-text">
+        <span class="week-name">Guest Lecture Reflections</span>
+        <span class="week-lessons">Fills the “no assignment” guest lectures in Weeks 4–7 — watch, post publicly, tag the speaker</span>
+      </div>
+      <span class="week-progress" data-role="progress">0/5</span>
+      <span class="chev">⌄</span>
+    </summary>
+    <div class="week-body">
+      <div class="assignment-list">
+        <details class="assignment" data-id="po-guest-lecture-01-rehan-allahwala">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Guest Lecture 01 - Rehan Allahwala</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-gl01"></div>
+        </details>
+        <details class="assignment" data-id="po-guest-lecture-02-asim-maharvi">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Guest Lecture 02 - Sahibzada Asim Maharvi</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-gl02"></div>
+        </details>
+        <details class="assignment" data-id="po-guest-lecture-03-hisham-sarwar">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Guest Lecture 03 - Hisham Sarwar</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-gl03"></div>
+        </details>
+        <details class="assignment" data-id="po-guest-lecture-04-dr-shahid-qureshi">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Guest Lecture 04 - Dr. Shahid Qureshi</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-gl04"></div>
+        </details>
+        <details class="assignment" data-id="po-guest-lecture-05-shahid-hussain-joya">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Guest Lecture 05 - Shahid Hussain Joya</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-gl05"></div>
+        </details>
+      </div>
+    </div>
+  </details>
+
+  <details class="week" data-week="Film">
+    <summary>
+      <span class="week-num" style="font-size:11px">Film</span>
+      <div class="week-head-text">
+        <span class="week-name">Bonus Films</span>
+        <span class="week-lessons">15 films, each with a trap / turn / price / engine reflection — not tied to a week</span>
+      </div>
+      <span class="week-progress" data-role="progress">0/15</span>
+      <span class="chev">⌄</span>
+    </summary>
+    <div class="week-body">
+      <div class="assignment-list">
+        <details class="assignment" data-id="po-watch-film-12-years-a-slave">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Watch Film - 12 Years a Slave</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-film-12years"></div>
+        </details>
+        <details class="assignment" data-id="po-watch-film-12th-fail">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Watch Film - 12th Fail</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-film-12thfail"></div>
+        </details>
+        <details class="assignment" data-id="po-watch-film-a-beautiful-mind">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Watch Film - A Beautiful Mind</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-film-beautifulmind"></div>
+        </details>
+        <details class="assignment" data-id="po-watch-film-blood-diamond">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Watch Film - Blood Diamond</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-film-blooddiamond"></div>
+        </details>
+        <details class="assignment" data-id="po-watch-film-hidden-figures">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Watch Film - Hidden Figures</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-film-hiddenfigures"></div>
+        </details>
+        <details class="assignment" data-id="po-watch-film-hotel-rwanda">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Watch Film - Hotel Rwanda</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-film-hotelrwanda"></div>
+        </details>
+        <details class="assignment" data-id="po-watch-film-queen-of-katwe">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Watch Film - Queen of Katwe</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-film-queenofkatwe"></div>
+        </details>
+        <details class="assignment" data-id="po-watch-film-radioactive">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Watch Film - Radioactive</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-film-radioactive"></div>
+        </details>
+        <details class="assignment" data-id="po-watch-film-rocketry-the-nambi-effect">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Watch Film - Rocketry: The Nambi Effect</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-film-rocketry"></div>
+        </details>
+        <details class="assignment" data-id="po-watch-film-super-30">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Watch Film - Super 30</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-film-super30"></div>
+        </details>
+        <details class="assignment" data-id="po-watch-film-temple-grandin">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Watch Film - Temple Grandin</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-film-templegrandin"></div>
+        </details>
+        <details class="assignment" data-id="po-watch-film-the-imitation-game">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Watch Film - The Imitation Game</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-film-imitation"></div>
+        </details>
+        <details class="assignment" data-id="po-watch-film-the-man-who-knew-infinity">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Watch Film - The Man Who Knew Infinity</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-film-manwhoknewinfinity"></div>
+        </details>
+        <details class="assignment" data-id="po-watch-film-the-pursuit-of-happyness">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Watch Film - The Pursuit of Happyness</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-film-pursuit"></div>
+        </details>
+        <details class="assignment" data-id="po-watch-film-the-theory-of-everything">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Watch Film - The Theory of Everything</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-film-theoryofeverything"></div>
+        </details>
+      </div>
+    </div>
+  </details>
+
+  <details class="week" data-week="•">
+    <summary>
+      <span class="week-num" style="font-size:11px">•</span>
+      <div class="week-head-text">
+        <span class="week-name">Everything Else</span>
+        <span class="week-lessons">YouTube shorts, 50 Books, Your Five Offers, Earn Something, Your Reports, Affiliate Marketing, weekly Astaghfar Count, and the compulsory closing video</span>
+      </div>
+      <span class="week-progress" data-role="progress">0/8</span>
+      <span class="chev">⌄</span>
+    </summary>
+    <div class="week-body">
+      <div class="assignment-list">
+        <details class="assignment" data-id="po-50-books-for-life">
+          <summary><input type="checkbox" class="chk"><span class="a-title">50 Books for Life</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-50books"></div>
+        </details>
+        <details class="assignment" data-id="po-affiliate-marketing-lets-earn-money">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Affiliate Marketing - Let's Earn Money</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-affiliate"></div>
+        </details>
+        <details class="assignment" data-id="po-astaghfar-count-weekly">
+          <summary><input type="checkbox" class="chk"><span class="a-title">W02 Astaghfar Count | 15–21 August</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-astaghfar"></div>
+        </details>
+        <details class="assignment" data-id="po-earn-something">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Earn Something</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-earnsomething"></div>
+        </details>
+        <details class="assignment" data-id="po-watch-these-youtube-short-videos">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Watch These YouTube Short Videos</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-youtubeshorts"></div>
+        </details>
+        <details class="assignment" data-id="po-your-five-offers">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Your Five Offers</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-fiveoffers"></div>
+        </details>
+        <details class="assignment" data-id="po-your-gkmba-story-on-camera">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Your #GKMBA Story on Camera</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-gkmbastory"></div>
+        </details>
+        <details class="assignment" data-id="po-your-reports-skilledscore-personality-visabridge">
+          <summary><input type="checkbox" class="chk"><span class="a-title">Your Reports</span><span class="src-tag src-portal">Portal</span><span class="chev">⌄</span></summary>
+          <div class="a-body" data-md="md-po-reports"></div>
+        </details>
+      </div>
+    </div>
+  </details>
+
+</section>
 </main>
 
 <div class="page-foot">
-  <span>41 assignments · 12 weeks · GKMBA course order</span>
+  <span>78 assignments · 12 weeks + portal bonus · GKMBA course order</span>
   <button class="reset-btn" id="reset-btn" type="button">Clear my checkmarks</button>
 </div>
 
@@ -1937,6 +2178,1029 @@ Fractional/volunteer: Applied to a part-time fractional analyst role on 2026-10-
 ```
 </script>
 
+<script type="text/markdown" id="md-po-w02a02">
+## Assignment brief (as given)
+
+Complete a private interest audit of every debt you currently owe, then identify the costliest debt to tackle after your reserve is ready.
+
+1. List each current debt, including loans, cards, instalments, committees, employer advances, and money owed to family or friends.
+2. Use safe labels such as Debt A and Debt B.
+3. Write today’s balance, the stated cost, and the true yearly rate or your best estimate.
+4. Rank debts from the highest rate to the lowest rate, not by balance size.
+5. Name the debt you will tackle after your reserve is ready.
+
+Paste your answer like this:
+Debt label | balance | stated cost | yearly rate or calculation | rank.
+Next debt after reserve | debt label.
+
+Evidence: Put your findings in the text box. Do not upload files.
+Privacy: Use safe debt labels. Do not add account numbers or private records.
+
+Optional workbook: You may use the Week 2 workbook (Ask your Coach) to organise your work. Paste your final answer here; do not upload the workbook.
+</script>
+
+<script type="text/markdown" id="md-po-w02a03">
+## Assignment brief (as given)
+
+Calculate one month of essential costs and make a clear plan for building your reserve.
+
+1. List housing, groceries, utilities, transport, and medicine or school fees for one month.
+2. Add the total.
+3. Choose a separate place to keep this reserve.
+4. Say how much you will add whenever you receive income.
+5. Set the date when it will be full.
+6. Confirm whether the account is open and the first transfer has been made.
+
+Paste your answer like this:
+Housing | amount
+Groceries | amount
+Utilities | amount
+Transport | amount
+Medicine or school fees | amount
+Total reserve target | amount
+Separate place | description
+Amount per income | amount
+Full-by date | date
+Account open | Yes/No
+First transfer made | Yes/No
+
+Evidence: Put your plan in the text box. Do not upload files.
+Privacy: Do not add bank details or account numbers.
+
+Optional workbook: You may use the Week 2 workbook (Ask your Coach) to organise your work. Paste your final answer here; do not upload the workbook.
+</script>
+
+<script type="text/markdown" id="md-po-w02a04">
+## Assignment brief (as given)
+
+Have one respectful conversation about an open money obligation that makes saving difficult.
+
+1. Choose the obligation.
+2. Talk in person or by voice.
+3. State one exact amount you can reliably provide, or one clear boundary.
+4. Record the other person’s response.
+5. Write your next step.
+
+Paste your answer like this:
+Obligation | safe label
+Date of talk | date
+My exact amount or boundary | answer
+Their response | short summary
+My next step | answer
+
+Evidence: Put your summary in the text box. Do not upload files.
+Privacy: Use a safe label. Do not share private messages, names, or recordings.
+
+Optional workbook: You may use the Week 2 workbook (Ask your Coach) to organise your work. Paste your final answer here; do not upload the workbook.
+</script>
+
+<script type="text/markdown" id="md-po-w02a05">
+## Assignment brief (as given)
+
+Send one thoughtful message to a person outside your usual circle who is one practical step ahead of you in similar work.
+
+1. Choose the person.
+2. Mention one specific thing about their work.
+3. Ask one small, clear question or request a short call. Do not ask for a job.
+4. Send the message.
+5. Record the reply status. A reply is not required.
+
+Paste your answer like this:
+Person | safe label
+What I noticed | answer
+My question or request | answer
+Date sent | date
+Reply status | reply/no reply/pending
+My next step | answer
+
+Evidence: Attach one cropped screenshot showing the message was sent.
+Privacy: Hide contact details and unrelated chats.
+
+Optional workbook: You may use the Week 2 workbook (Ask your Coach) to organise your work. Paste your final answer here; do not upload the workbook.
+</script>
+
+<script type="text/markdown" id="md-po-w02a06">
+## Assignment brief (as given)
+
+Build a simple record showing who you are, what work you have done, who can confirm it, and where people can see your work.**
+1. Check your name**
+Privately check that your name is written the same way on one government record, one bank or wallet record, and one work profile. Do not upload these records. Simply answer Yes or No.**
+2. Add two work samples**
+For each finished work sample, provide its title, date, and a public link. The links must open without asking you for permission.**
+3. Add one person who can confirm your work**
+Provide the person's name, how they know your work, whether they would confirm your work if contacted, and what they can confirm. You do not need a written message, permission screenshot, phone number, email address, or private conversation.**
+4. Add your online profile**
+Paste the link to your main online profile or channel. You can use a LinkedIn profile, Instagram profile, YouTube channel, Upwork or Fiverr profile, Facebook business page, portfolio, Google Site, or personal website.
+The profile must be public and show your name and the type of work you do. Paste your main profile or channel, not a single post, video, or work sample.**
+5. Check your links**
+Make sure both work-sample links open and your online profile is public. The links must not require your approval to view them.
+**
+Copy this format into the answer box:
+
+Name on government record matches | Yes/No
+Name on bank or wallet matches | Yes/No
+Name on work profile matches | Yes/No
+Work sample 1 | title | date | public link
+Work sample 2 | title | date | public link
+Reference person's name | name
+How they know my work | relationship
+If contacted, would they confirm my work? | Yes/No
+What they can confirm | short answer
+My online profile | profile or channel link
+Link check | Both work-sample links open and my online profile is public | Yes/No
+
+Privacy:** Put everything in the answer box. Do not upload files. Never share identity documents, bank records, account numbers, phone numbers, email addresses, private messages, or company secrets.
+</script>
+
+<script type="text/markdown" id="md-po-w02a07">
+## Assignment brief (as given)
+
+Earn a new payment this week through work you personally deliver.
+
+1. Complete and deliver the work.
+2. Record the customer or client type, payment amount, payment date, and payment channel.
+3. State whether this is a new earning route or an existing one.
+4. Write one lesson from the work.
+5. Attach current proof of payment.
+
+Paste your answer like this:
+Work delivered | short description
+Customer or client type | safe label
+Payment amount | amount
+Payment date | date
+Payment channel | safe label
+New or existing earning route | answer
+One lesson | answer
+
+Evidence: Attach one cropped screenshot or receipt showing the amount and date.
+Privacy: Hide account numbers, balances, contact details, and transaction IDs. A gift, self-transfer, passive income, old payment, or old screenshot does not count.
+
+Optional workbook: You may use the Week 2 workbook (Ask your Coach) to organise your work. Paste your final answer here; do not upload the workbook.
+</script>
+
+<script type="text/markdown" id="md-po-noreels">
+## Assignment brief (as given)
+
+Make a short pledge video.
+In the video, say:
+1. Your name.
+2. Today’s date.
+3. “For the next 90 days, I will not watch Instagram Reels, YouTube Shorts or TikTok videos.”
+4. What you will do with this free time.
+Post the video and paste its link in your answer.
+Submit:
+Pledge date | date
+Video link | link
+I will use this time for | answer
+Make sure the video link opens.
+</script>
+
+<script type="text/markdown" id="md-po-mujhe">
+## Assignment brief (as given)
+
+Get access to the book Mujhe Job Chahiye.
+If you are in Pakistan, order the printed book here:
+https://gufhtugu.com/mujhe-job-chahiye-apply/
+If you are outside Pakistan, download the Gufhtugu app and start reading the digital book.
+iPhone or iPad:
+https://apps.apple.com/pk/app/gufhtugu-urdu-books-library/id1614142319
+Android:
+https://play.google.com/store/apps/details?id=com.gufhtugupublication
+If you ordered the printed book, submit:
+Route | Printed book
+Order date | date
+Order number | number
+Order placed | Yes
+If you used the application, submit:
+Route | iOS app or Android app
+App downloaded on | date
+Book opened | Yes
+Started reading | Yes
+Do not share card numbers, bank information, passwords or payment details.
+No screenshot is required.
+</script>
+
+<script type="text/markdown" id="md-po-thaksession">
+## Assignment brief (as given)
+
+Share what you have learned from the live session - Thak Gaye Ho Na, in your own words.
+</script>
+
+<script type="text/markdown" id="md-po-gl01">
+## Assignment brief (as given)
+
+Some people teach business from a podium. This one has run roughly a hundred and fifty businesses across several countries, failed at most of them, and says so publicly, then went and built a school in Korangi where children learn to earn while they are still in school, and gives away nearly everything he knows for free online.
+
+You are not watching this for motivation. You are watching it to steal a working method from a man who has tested more ideas than you will attempt in a lifetime.
+
+### Before the session
+
+Spend ten minutes on his work first. Look at what Rehan School actually does, how the students earn, and what he says the money is for. Arrive with one question you would not have thought of otherwise.
+
+### While you watch
+
+Write as he talks. Not a transcript, a hunt:
+
+- **The claim**: what is the one thing he says that contradicts what you were taught at home or in school? Write it down word for word.
+- **The method**: strip out the story and find the mechanism underneath. How exactly does a person with no money and no contacts start earning? Write the steps in order.
+- **The proof**: every strong claim should have evidence behind it. Note what he offers as proof, and note where you are simply being asked to trust him.
+- **The cost**: a hundred and fifty businesses means a great many failures. Listen for what those cost him and what he says he learned that could not be learned any other way.
+- **The one action** — pick a single thing he says you should do this week. Just one.
+
+### Then post it publicly
+
+This part is compulsory, and it is not a formality.
+
+Write a post of 200 to 300 words in your own words. Not a summary of the session, what changed in your head because of it. Include:
+
+- The line that hit hardest and why it hit you specifically.
+- The method you will actually use, with the date you will start.
+- One thing you disagreed with. Disagreeing respectfully in public is a skill, and this is a safe place to practice it.
+
+Then **tag Rehan Allahwala** in the post and use **#GKMBA**.
+
+Tag him properly, not as decoration. First, he gave us his time for free — carrying his work further is how you pay a speaker who does not want your money. Second, he has millions of followers; when somebody with that reach engages with your post, you are no longer writing into an empty room. Your name appears in front of people who have never heard of you. Learn to do this well and honestly: real thoughts, real credit, no flattery.
+
+### Submission
+
+Post publicly on LinkedIn, Facebook or Instagram, wherever your professional audience actually is. Then drop the link in the cohort group.
+
+**No screenshot of a draft. Only a live link counts.**
+</script>
+
+<script type="text/markdown" id="md-po-gl02">
+## Assignment brief (as given)
+
+Everything else in this cohort is about the outside of your life: your skills, your income, your CV, your network. This session is about the person who has to carry all of it. He had a settled career as a journalist in America and walked away from it in 2001 to come back to Pakistan, study, translate old manuscripts, publish books that were never going to make him rich, and build a study center from nothing.
+
+You are not attending this for peace of mind. You are attending it to watch a man who calculated the price of a life he actually wanted and then paid it in full, without complaining about it afterwards.
+
+**Before the session**
+
+Spend ten minutes on his work first. Look at what Chishtiya Ribbat does, what he means by _ishq ustad_ — love is the teacher — and what people arrive at his door carrying. Bring one question you would feel slightly embarrassed to ask out loud. Ask it anyway.
+
+**While you listen**
+
+Keep a page open as he speaks. Not notes, a hunt:
+
+- The correction — where does he say your generation has something backwards? Write his sentence the way he said it, not the softer version you would prefer.
+
+- The practice — a philosophy you cannot use on Monday morning is decoration. Find the daily habit underneath the wisdom. What do you do, when, and for how long?
+
+- The measure — every teacher has a way of telling whether a person is growing or performing. Find his. How would he know you had changed?
+
+- The letting go — he gave up a country, a salary and a career. Listen for what that cost him, and separately for the part he says he would not take back. They are not the same thing.
+
+- The one action — one thing to begin this week. Only one. A list is a polite way of doing nothing.
+
+**Then post it publicly**
+
+Compulsory, and not a formality.
+
+Write 200 to 300 words in your own words. Not a report of the session, what moved inside your head because of it.
+
+Include:
+
+- The sentence that stayed with you after the session ended, and why it landed on you and not on somebody else.
+- The practice you are starting, with the date you begin.
+- One thing you are still not convinced about. Saying "I am not sure yet, and here is why" in public, without being rude, is a skill you will use in every job you ever hold. Practice it here, where it is safe.
+
+Then tag Sahibzada Asim Maharvi in the post and use #GKMBA.
+
+Tag him properly, not as decoration. First, he gave us time he could have given to anybody, and he does not want our money — carrying his words further than one evening could carry them is the only payment on the table. Second, his audience is older, spread across Pakistan, Britain and the Gulf, and full of people who make decisions about other people's lives; write it as though a decision-maker is reading, because one might be.
+
+**Submission**
+
+Post publicly on LinkedIn, Facebook or Instagram, wherever your professional audience actually is. Then drop the link in the cohort group.
+
+No screenshot of a draft. Only a live link counts.
+</script>
+
+<script type="text/markdown" id="md-po-gl03">
+## Assignment brief (as given)
+
+He began with a laptop, a slow internet connection and no contacts, doing design and web work for strangers abroad. He crossed a million dollars in online earnings, then did the thing almost nobody does after making money: he published his whole method for free and started training the people who would eventually be his competition. He reads about thirty books a year and still spends his time arguing publicly about what Pakistan has to fix before freelance exports can grow.
+
+This session is not about how to open an Upwork account. He has called it "Find Your WHY" for a reason. Most people who start a business in this country start it because a cousin did well, or because a video made it look easy, and they quit in the fourth month when it stops being fun. Your job today is to find out what keeps a person going in that fourth month.
+
+**Before the session**
+
+Give ten minutes to his work first. Look at what he actually gives away on Being Guru, and read one thing he has written recently about where the freelancing market is heading. Notice the difference between what he sells and what he gives. Come with one question about that gap.
+
+**While you watch**
+
+Have a page open while he talks. Not a transcript, a hunt:
+
+- The reason — he will separate a real _why_ from a fake one. Write down how he tells them apart, in his words. Then hold your own reason against that test, honestly.
+
+- The start — forget the million dollars and go back to his first paid job. What did he sell, who bought it, and what did he not have at the time? Write the sequence in order, because that sequence is the part you can copy.
+
+- The market — he watches this industry for a living. Note what he says is dying, what he says is growing, and what he says people are still being sold that no longer works.
+
+- The quitting point — everyone who lasts has a story about the month they nearly stopped. Listen for his. What was happening, and what specifically kept him at the desk?
+- The one action — one thing to do this week. Only one, and it must be something you can finish.
+
+**Then post it publicly**
+
+Compulsory, and not paperwork.
+
+Write 200 to 300 words in your own words. Not a recap of the talk — the part of your thinking he disturbed. It should carry:
+
+- Your _why_, written out in one clear sentence. Not a slogan. Something you would still say out loud on a bad day.
+- The first step you are taking, with the date. Small and specific beats big and vague.
+- One place where your situation is different from his, and what you will have to solve that he never had to.
+
+Then tag Hisham Sarwar and use #GKMBA.
+
+Tag him deliberately. First, it is basic decency — he gave a working method away and asked for nothing. Second, his audience is freelancers, agency owners, people who hire, people who pay — not admirers but buyers. Write it as though a client is reading, because one might be. Real thinking, proper credit, no praise for the sake of praise.
+
+**Submission**
+
+Post publicly on LinkedIn, Facebook or Instagram, wherever your professional audience actually is. Then drop the link in the cohort group.
+
+No screenshot of a draft. Only a live link counts.
+</script>
+
+<script type="text/markdown" id="md-po-gl04">
+## Assignment brief (as given)
+
+Everyone else in this series can tell you what worked for them. He is the only one who can tell you what works on average, because he has spent his career watching thousands of people try, and keeping count of which ones were still standing three years later.
+
+He trained as a mechanical engineer, then went to Berlin and did a doctorate in how businesses actually get started. He spent twelve years running the entrepreneurship center at IBA Karachi and took that work out of Karachi into Balochistan, Sindh, Punjab and KP, into places where nobody had ever met a founder. He has trained village women and engineering students in the same year. He now runs a university. He has also studied Pakistani startups long enough to know exactly which excuse you are about to give him, because he has heard it a thousand times.
+
+**Before the session**
+
+Give ten minutes to it first. Find out what he means when he says you should start from what is already in your hand instead of waiting for capital. Then write down, on paper, the three things you already have: what you know, who you know, and who you are. Bring that list. He may ask for it.
+
+**While you watch**
+
+Keep a page open. Not a summary, a hunt:
+
+- The pattern — he has seen it repeat for twenty years. What does he say the ones who survive have in common, and what does he say the ones who fold had in common? Two separate lists.
+
+- The starting kit — pin down his answer to the question everyone asks: how do you begin with no money? Write his sequence exactly, because a researcher's sequence is tested and yours is a guess.
+
+- The idea question — most people believe the idea is the hard part. Find out where he says the real difficulty sits, and what he thinks an idea is actually worth before anyone has paid for it.
+
+- The country — he has sat on boards and advised policy. Note what he says is genuinely stacked against a young founder here, and separately what he says people blame on the country when it is really on them. Do not blur those two together.
+- The one action — a single thing to do this week. One. Something you can complete before the next session.
+
+**Then post it publicly**
+
+Required, and not a box to tick.
+
+Write 200 to 300 words in your own words. Not what he said — what he took away from you. Include:
+
+- The belief about business you walked in with that you are walking out without.
+- The one resource already in your hand that you had been treating as worthless, and what you will do with it.
+- One question you did not get to ask. Leave it in the post. Good questions attract people.
+
+Then tag Dr. Shahid Qureshi and use #GKMBA.
+
+Tag him on purpose. First, he spent an evening on a cohort that pays him nothing — passing his thinking on is the only thanks that means anything. Second, the people around him are gatekeepers: vice chancellors, incubator heads, grant committees, funding boards. Write as a person with a mind, not as a fan. Say something specific enough that it could only have come from you.
+
+**Submission**
+
+Post publicly on LinkedIn, Facebook or Instagram, wherever your professional audience actually is. Then drop the link in the cohort group.
+
+No screenshot of a draft. Only a live link counts.
+</script>
+
+<script type="text/markdown" id="md-po-gl05">
+## Assignment brief (as given)
+
+Every other guest in this series speaks from a stage, a campus or a global platform. This one trades fertilizer in Khanewal.
+
+That is exactly why he is here. He knows the business that most of you will actually end up running - a shop, a godown, a small trading line, a service in your own city, with real inventory, real credit, and customers who bargain. He teaches it in Urdu to people nobody else bothers to teach, and he has gone further than teaching: people hand him their savings and he helps them build a business that suits them, then keeps helping after the money is spent. Very few people in this country put their name next to somebody else's capital like that.
+
+Listen to him as the man who understands the economy you live in, not the one you watch on YouTube.
+
+**Before the session**
+
+Give ten minutes to it. Walk through your own bazaar or market street and count the businesses on one side of the road. Note which three look busy and which three look dead. You will not know why yet. Bring that list, and bring one question about a business you have personally thought of starting.
+
+**While you watch**
+
+Keep a page open. Not a summary, a hunt:
+
+- The numbers — he deals in margins, not slogans. Catch every figure he says out loud: what a thing costs to set up, what it returns, how long before it pays back. Write them down before they leave your head.
+
+- The fit — he does not give everybody the same business. Find out how he decides which business suits which person. What is he looking at when he sizes somebody up?
+
+- The trust — people give him money and sleep at night. Work out how a man from a small city built that kind of credibility, step by step. This is the most valuable thing in the session and he may not even name it directly.
+
+- The warnings — he has seen people lose their savings. Listen for the businesses he tells people to stay away from, and for the mistake he says beginners repeat most often.
+- The one action — one thing to do this week. Only one, and it should cost you nothing but time.
+
+**Then post it publicly**
+
+Compulsory, and it is part of the assignment, not a courtesy.
+
+Write 200 to 300 words in your own words. Not a report of the talk — what it changed about the plan in your head. Include:
+
+- The business idea you were carrying before the session, and what you now think is wrong with it.
+- One number from the session that surprised you, and what it means for you specifically.
+- The first small step you will take in your own city, with the date.
+
+Then tag Shahid Hussain Joya and use #GKMBA.
+
+Tag him deliberately. First, he gave time he could have spent on his own trade to people who are not his customers. Second, the people reading his posts — traders, shopkeepers, distributors, first-time founders in towns like yours — could become your supplier, partner or first customer. Write your post in language they actually speak; Urdu is completely fine here.
+
+**Submission**
+
+Post publicly on LinkedIn, Facebook or Instagram, wherever your professional audience actually is. Then drop the link in the cohort group.
+
+No screenshot of a draft. Only a live link counts.
+</script>
+
+<script type="text/markdown" id="md-po-film-12years">
+## Assignment brief (as given)
+
+A free man, a working violinist with a wife and children in New York, accepts a job offer from two strangers in 1841. He wakes up in chains. For the next twelve years he is bought, sold and beaten in Louisiana under a name that is not his, and the law of that country offers him nothing, because his word as a Black man counts for less than a receipt.
+
+Watch this one carefully and slowly. It is not entertainment and it is not comfortable, and that is the point of putting it in a business course.
+
+### How to watch it
+
+Four hunts. This trap is unlike every other film on the list, because here the system is not indifferent — it is designed:
+
+- **The trap:** his freedom was documented and legal, and it made no difference at all, because the paperwork was in New York and he was in Louisiana. Note how quickly identity collapses when nobody nearby will verify it.
+- **The turn**: this is the difficult one. His survival depends on hiding what he can do. He is educated and literate among people who would kill him for it. Track how he decides when to show competence and when to disappear.
+- **The price**: twelve years of his children's lives, and a permanent lesson in which humans will betray you for very small gains.
+- **The engine: **patience, and a single correctly chosen ally at the exact right moment. He tried to get word out several times before it worked. Count the failed attempts before the successful one.
+
+### Then find out what happened after
+
+He was freed in 1853 and published his account the same year, in his own words, with names, places and dates — a rare first-hand record that historians still rely on. The men who kidnapped him were never punished; the courts would not hear his testimony against white defendants. He worked as a speaker on the abolition circuit for some years and then vanishes from the record entirely. Nobody knows where or when he died. Look this up, along with the current global estimates for forced labour and trafficking, then answer:
+
+- Slavery is illegal everywhere on earth today and tens of millions of people are still living in some form of it. Where does that exist in the supply chains you buy from?
+- He won his freedom back and never got justice. Which one were you assuming was the goal?
+
+### **_Submit (250–300 words, post publicly, tag #GKMBA)_**
+
+- Trap, turn, price, engine — two or three lines each.
+- Verify your own paper: check where your degree, identity documents, employment records and professional history are actually stored and who can confirm them if you are far from home. Fix any gap this month.
+- Look at one thing you own or one contract you work under. Trace who made it and under what conditions. Write what you found, even if the answer is that you could not find out.
+
+**The point:** He was not naive, unqualified or lazy. He was taken, because a system had been built to profit from taking people like him, and no personal virtue prevents that. Know the systems you live inside, and never assume that being good at your job is a form of protection.
+</script>
+
+<script type="text/markdown" id="md-po-film-12thfail">
+## Assignment brief (as given)
+
+Watch 12th Fail with a notebook open.
+Submit approximately 300 words answering all four questions.
+1. What did it actually cost him?
+Name the years, money, sacrifices and people who paid the cost with him.
+2. Who carried him?
+Name the people who helped him and state what each person contributed.
+3. What can you copy on Monday?
+Choose one specific action you can complete before the week ends.
+4. What did the film leave out?
+Think about the people who worked just as hard but did not achieve the same outcome.
+Submit:
+Question 1 | answer
+Question 2 | answer
+Question 3 | answer
+Question 4 | answer
+My concluding sentence | one sentence
+Do not submit a film review. Do not write only about how emotional or inspiring the film was.
+Paste the answer in the text box. No upload is required.
+</script>
+
+<script type="text/markdown" id="md-po-film-beautifulmind">
+## Assignment brief (as given)
+
+A twenty-one-year-old writes a short thesis at Princeton. It sits mostly ignored, then wins him the Nobel in economics forty-four years later, after three decades of his mind turning against him. This is a film about output surviving the person producing it.
+
+How to watch it
+
+Four hunts, and here the second one is unusual:
+
+The trap: this one is not money. It is a mind that produces brilliant patterns and false patterns using the same machinery, and cannot tell which is which. Notice how confidence feels identical in both cases.
+The turn: not a triumph scene. It is the quiet decision to stop arguing with what he sees and start ignoring it. Find that line of dialogue.
+The price: his career, his safety, years erased, and a wife who carried the household while the world moved on. Watch her, not him, in the middle third.
+The engine: one idea. Under thirty pages. That is all he needed to have already banked before everything fell apart.
+Now check the film against the record
+
+The movie is beautiful and partly untrue. His hallucinations were voices, not the visible roommate and the little girl, those were invented so an audience could see what he heard. The tidy ending is tidier than the life. His mathematics beyond game theory, in geometry and partial differential equations, is what mathematicians rate highest; it won him the Abel Prize in 2015, shared with Louis Nirenberg.
+
+Read up, then answer:
+
+Which changes did the filmmakers make to help you understand, and which made you understand wrongly? Two examples of each.
+His 1950 idea now runs through economics, political science, computer science and AI. Why did the world need forty-four years to pay him for it?
+
+Submit (250–300 words, post publicly, tag #GKMBA)
+
+Trap, turn, price, engine — two or three lines each.
+Your thirty pages: what is the one piece of work you could produce this year that would still be worth something if you disappeared for a decade? Name it and give the first step.
+
+List three beliefs you hold about your career that you have never tested. Beside each, write how you could check whether it is true.
+
+The point: He never got cured of seeing things. He got better at deciding which things deserved his attention. That skill has nothing to do with mathematics and everything to do with running your own life.
+</script>
+
+<script type="text/markdown" id="md-po-film-blooddiamond">
+## Assignment brief (as given)
+
+Sierra Leone in the late 1990s. A fisherman is torn from his family and forced to dig in a river for stones he will never own. A smuggler wants the same stone to buy his way out of Africa. A journalist wants the story. Behind all three sits a polite trading house in Europe where nobody's hands are dirty and everybody's profits are clean.
+
+This is the only film on your list where the main characters are invented. That is deliberate — this time you are not studying a person. You are studying a supply chain.
+
+### How to watch it
+
+Four hunts, aimed at the system rather than the man:
+
+- **The trap:** a country sitting on enormous wealth whose people are among the poorest on earth. Track where the value goes at each handover: digger, warlord, smuggler, dealer, cutter, retailer, buyer. Write the chain down as you watch.
+- **The turn**: for the fisherman, it is when he stops trying to survive the situation and starts using the one asset he has that everyone else wants. For the smuggler, it is when he stops trading in people and pays for it. Note both.
+- **The price**: a generation of children turned into soldiers, and a whole economy where the honest work pays worse than the violent work. That last sentence is the real subject of the film.
+- **The engine: ** the buyer at the end of the chain, who is you, and who does not ask a single question at the counter.
+
+### Then look at where this stands today
+
+The industry's answer was a certification scheme launched in 2003, and its own critics point out the gaps: it counts only stones funding rebel groups, so abuses by governments are outside its scope, and once a rough stone is cut and polished its origin is close to untraceable. Meanwhile the market moved for commercial reasons rather than moral ones — lab-grown stones are now a large and fast-growing business, and a majority of engagement rings sold in the United States last year used them. Look this up, then answer:
+
+- The certification scheme did not solve it. Cheaper technology largely did. What does that suggest about how ethical problems actually get fixed?
+- Now apply the same chain to the phone you are reading this on. Trace the cobalt, lithium and coltan back and write what you find.
+
+### **_Submit (250–300 words, post publicly, tag #GKMBA)_**
+
+- Trap, turn, price, engine — two or three lines each, aimed at the system rather than a character.
+- Map your own value chain: pick your product, service or salary and write who captures value at each step from raw input to final customer. Mark where you sit and where the money concentrates.
+- Answer this plainly: in your own work, who is the digger in the river? Name them and say whether your business could survive paying them properly.
+
+**The point:** Every product has a story upstream of the shop window, and the profits are almost always furthest from the labor. Learn to read the whole chain, because that is where the real leverage is and because one day someone will be reading yours.
+</script>
+
+<script type="text/markdown" id="md-po-film-hiddenfigures">
+## Assignment brief (as given)
+
+Three women did the mathematics that put American astronauts into orbit, from inside an office building where they were not allowed to use the same coffee pot or the same bathroom as their colleagues. For decades almost nobody outside that building knew their names. The film is set in 1961. Read that sentence again and notice how recent that is.
+
+### **How to watch it**
+
+Four hunts. Here the trap is not personal at all — it is architectural:
+
+- **The trap:** the rules were written into the furniture. Separate bathrooms, separate seating, a job title that capped their pay whatever their output. Count how many minutes a day Katherine loses just walking to a bathroom she is permitted to use.
+- **The turn**: three different turns, so track all three. Katherine walks into a briefing room nobody invited her to. Mary goes to a court to win the right to sit in a night class. Dorothy teaches herself the language of the machine that is about to replace her whole department.
+- **The price**: years of being underpaid, unmentioned and quietly furious, while raising children and burying husbands.
+- **The engine: **Dorothy is the one to study most closely. She sees the new machine arrive, understands that it will end her job, and instead of resisting it she learns it first and brings her entire team across with her. That is the single most useful career move in this whole film list.
+
+### Then find out what became of them
+
+All three lived long enough to be recognized, most of it very late. NASA now has a computational research building at Langley named after Katherine Johnson, its Washington headquarters named after Mary Jackson, and a centre in Houston named after Dorothy Vaughan. Congress gave all of them its gold medal, most of it after their deaths. Katherine Johnson lived to 101. Then answer:
+
+- The work was done in 1961 and the credit arrived around 2016, mostly because a writer dug it out. What does that tell you about relying on merit alone to be noticed?
+- Dorothy saw the machine coming and moved first. Look at your own job and name the machine that is coming. What is your version of learning it before it arrives?
+
+### _**Submit (250–300 words, post publicly, tag #GKMBA)**_
+
+- Trap, turn, price, engine: two or three lines each.
+- Your briefing room: name one meeting, group, platform or conversation you are not currently invited into but where decisions about your work get made. Write how you will get inside it this quarter.
+- Learn a piece of the machine this week — one AI tool, one function, one skill your department currently outsources. Show what you built with it and teach one colleague.
+
+**The point:** Being excellent and being visible are two separate jobs. They did the first one brilliantly and waited fifty years for the second. You do not have fifty years.
+</script>
+
+<script type="text/markdown" id="md-po-film-hotelrwanda">
+## Assignment brief (as given)
+
+In 1994, roughly eight hundred thousand people were killed in Rwanda in about a hundred days, mostly with machetes, while the world watched and left. In the middle of it, a hotel manager kept more than a thousand people alive inside his building using nothing but the tools of his trade: a phone list, a wine cellar, a bank of favours, and the ability to stay calm while lying to armed men.
+
+This is the hardest film on the list. Watch it in daylight, and be ready.
+
+### How to watch it
+
+Four hunts. Everything he uses here is a business skill:
+
+- **The trap:** a country where the killing was organised, the foreign troops were ordered to withdraw, and no rescue was coming for anyone. Note the exact moment he understands nobody is arriving.
+- **The turn**: he stops thinking like a manager protecting a hotel and starts thinking like a man running an operation. Watch the switch in what he chooses to lie about.
+- **The price**: every negotiation drains something. Money, whisky, cigars, dignity, contacts, his own family's safety. Track what he spends on each round.
+- **The engine: ** the phone calls, and the relationships he had built over ordinary years of work with powerful people who had no idea they would one day be asked to save lives. He was not connected because he planned for genocide. He was connected because he did his job well for a long time.
+
+### Then look at what happened to him afterwards
+
+He received America's Presidential Medal of Freedom, moved to Texas, and became a vocal critic of Rwanda's president. In 2020 he boarded a flight believing he was going to Burundi and landed in Kigali instead. He was tried on terrorism charges, sentenced to twenty-five years, and released in 2023 after heavy diplomatic pressure; the United States had by then classed him as wrongfully detained. He is back in San Antonio and still writing. Separately, some Rwandan survivors and historians have long disputed how the film portrays him. Read both sides, then answer:
+
+- The film gave him a global platform, and that platform is arguably what made him a target twenty-six years later. What does fame actually buy you, and what does it cost?
+- Survivors dispute parts of the story. Does that change what the film is worth as a lesson? Explain your reasoning.
+
+### **_Submit (250–300 words, post publicly, tag #GKMBA)_**
+
+- Trap, turn, price, engine — two or three lines each.
+- Your phone list: name five people who would take your call in a genuine emergency. If the list is thin, that is the finding. Write how you will earn three more this year, and start with one message today.
+- Describe a situation where you had to negotiate with someone who held all the power. What did you offer, and what would you offer differently now?
+
+**The point:** He had no weapons, no authority and no army. What he had was a reputation built over years and the nerve to spend it all at once. Relationships are not networking. They are the only currency that works when the money stops meaning anything.
+</script>
+
+<script type="text/markdown" id="md-po-film-queenofkatwe">
+## Assignment brief (as given)
+
+A girl selling maize in a Kampala slum walks into a room because someone is giving away free porridge. She stays for the chess. Nine years old, cannot read, no shoes. That room ends up rewriting her whole family's future.
+
+How to watch it
+
+Same four hunts as last time — but the answers here are very different, so do not copy your old paper:
+
+The trap — she dropped out of school at nine. What exactly closed that door?
+The turn — mark the minute she stops seeing herself as a slum girl who plays chess and starts seeing herself as a player.
+The price — arriving at college she didn't know how to type; a two-page assignment took her four days while classmates finished in ten minutes. Where else in the film does she pay for what she was never taught?
+The engine — count the boring repetitions. The coach, Robert Katende, had no salary worth the name and kept showing up anyway.
+
+Then find out what happened after the credits
+
+Phiona Mutesi graduated from Northwest University in 2021 with a business degree, worked at Microsoft as a business strategy analyst until 2023, and then moved to Deloitte in Canada as a business operations analyst. She has not played competitive chess since the 2018 Olympiad. Look it up yourself, then answer:
+
+She never became a grandmaster. Is that a failed story or a successful one? Defend your answer.
+Chess was the door, not the room. What was the door actually for?
+Katende built the ladder and stayed at the bottom of it. What does that tell you about who gets remembered versus who gets rich?
+
+Submit (250–300 words, post publicly, tag #GKMBA)
+
+Trap, turn, price, engine — two or three lines each.
+
+Name your "free porridge" — the small, almost embarrassing reason you could walk into a room this month where the real opportunity is sitting.
+
+Name the skill everyone around you assumes you already have, and that you quietly do not. Say how you will fix it in 30 days.
+
+The point: Nobody rescued her. She was handed one narrow opening and used it for something bigger than the opening was for. That is the whole game.
+</script>
+
+<script type="text/markdown" id="md-po-film-radioactive">
+## Assignment brief (as given)
+
+A Polish woman arrives in Paris with almost nothing, is thrown out of a laboratory for taking up space, and goes on to discover two elements, invent the word radioactivity, and win Nobel Prizes in two different sciences — the only person ever to manage that. The same discovery killed her, and later killed hundreds of thousands of strangers. The film refuses to separate those two facts, and that is why it is on this list.
+
+### How to watch it
+
+Four hunts. This one asks a question the others avoid: what happens after you succeed?
+
+- **The trap**: foreign, female, poor, and working in a country whose institutions were not built to contain any of those. Note how often she is offered a smaller version of what she asked for.
+- **The turn**: she refuses to be the assistant. Watch her insist on her own name on her own work, and watch what it costs her socially every single time.
+- **The price**: a husband killed in the street, a public scandal the newspapers ran because she was a widow, an immigrant and inconveniently brilliant, and a body slowly wrecked by the material she carried in her pockets. Her laboratory notebooks are still too radioactive to handle safely.
+- **The engine: **years of physical labor. Stirring tonnes of pitchblende by hand in a leaking shed to extract a fraction of a gram. Most of her genius looks like manual work performed for far longer than a sane person would continue.
+
+### Then find out what the work is doing today
+
+Radiation therapy treats cancer patients in every major hospital on earth. Her mobile X-ray vans took imaging to the wounded at the front in the First World War and set the template for battlefield medicine. Europe's biggest research fellowship program is named after her, and thousands of scientists a year are funded by it. Her institute in Paris is still a working cancer center. The same physics also produced Hiroshima and Chernobyl, both of which the film cuts to deliberately. Look this up, then answer:
+
+- She discovered something and did not control what humanity did with it. Where is that same question live in your field today?
+- She refused to patent her methods so that the science stayed open. Was that noble or naive? Take a side and defend it.
+
+### _**Submit (250–300 words, post publicly, tag #GKMBA)**_
+
+- Trap, turn, price, engine: two or three lines each.
+- Your shed: name the unglamorous, repetitive work in your field that most people skip, and commit to twenty hours of it this month. Say what those hours will produce.
+- Write the second-order effects of your own current project. Three ways it could be used against the purpose you intend. Then say what safeguard you will build in now.
+
+**The point:** She paid for her discovery with her health, her privacy and her reputation, and never once asked for the terms to be softened. Also notice this: her fame did not protect her from any of it. Do not wait for recognition to make you safe.
+</script>
+
+<script type="text/markdown" id="md-po-film-rocketry">
+## Assignment brief (as given)
+
+A rocket scientist who had spent his life building engines for India's space programme was arrested in 1994 on a fabricated charge of selling secrets to Pakistan. He was jailed, beaten, paraded through his own neighbourhood as a traitor, and dropped by almost everyone who knew him. It took the courts until 2018 to say plainly that none of it was true. He was in his late seventies by then.
+
+### How to watch it
+
+Four hunts. This trap is the one nobody prepares you for — the trap is other people:
+
+- **The trap:** not lack of skill. He had already helped bring liquid-fuel engine technology to India, and that competence was exactly what made him worth destroying. Watch how quickly a reputation built over thirty years evaporates in a week of newspaper headlines.
+- **The turn**: after his release, he could have gone quiet and lived. He decided instead to spend the rest of his life forcing the state to admit what it did. Mark the scene where he chooses the long fight over the quiet life.
+- **The price**: his wife's health, his children's schooling, decades of legal expense, and technology India could have had years earlier because the man who understood it was sitting in a cell.
+- **The engine**: documents. He wins in the end not through anger but through paperwork, patience and the courts. Twenty-four years of filing.
+
+### Then find out where the case stands
+
+The Supreme Court declared the prosecution malicious in 2018, ordered Kerala to compensate him, and set up a committee under a retired judge to pursue the officials responsible. He was given the Padma Bhushan the following year. The criminal proceedings against the former police officers have crawled on for years since, with bail applications and counter-allegations. He is now in his mid-eighties and still turning up. Read the current status, then answer:
+
+- The apology took twenty-four years and the punishment of the guilty is still not finished. Is his fight a victory?
+- His life was destroyed by people protecting their own careers, not by enemies. Where does that risk exist in your own workplace?
+
+### _**Submit (250–300 words, post publicly, tag #GKMBA)**_
+
+- Trap, turn, price, engine — two or three lines each.
+- Build your paper trail: pick one thing you have done professionally that exists only in conversation or memory, and put it in writing this week — an email record, a signed scope, a documented result.
+- Name someone whose reputation was damaged in front of you while you stayed silent. Write what you should have done. Then write what you will do next time.
+
+**The point:** Talent will not protect you from a system that decides to come after you. What protects you is documentation, a few people who will stand publicly beside you, and the stubbornness to keep filing long after everyone advises you to move on.
+</script>
+
+<script type="text/markdown" id="md-po-film-super30">
+## Assignment brief (as given)
+
+Movie is available on YouTube for Free: https://youtu.be/ldxDxiDEoJ4
+
+A poor teacher's son in Patna gets into Cambridge and cannot afford the ticket. What he builds instead changes 30 lives a year, every year. You are not watching it for entertainment. You are watching it for method.
+
+How to watch it (this part matters more than the film)
+
+Keep a notebook open. Pause when something lands. You are hunting for four things:
+
+The trap — what exactly was holding him down? Money? Caste? A system that had already decided who gets a seat?
+The turn — the precise moment he stops asking permission and starts building his own thing. Note the timestamp.
+The price — what it cost him. Nobody escapes free. List what he lost.
+The engine — what he did daily that nobody clapped for.
+
+Most people watch a film and feel something for two hours. You are going to watch it and extract a system.
+
+After the film — research
+
+The story did not stop in 2019. In May 2026, Anand Kumar launched Super Infinity, a digital campus that teaches mathematics through storytelling, animation and music, meant to reach millions instead of thirty, in several languages. Look it up. Read what he said at the launch. Then answer:
+
+Why did he move from 30 students to infinite students? What forced the shift?
+He waited over twenty years before going digital. Was that patience or delay?
+Somebody in his comments asked whether this will just be another paid platform poor kids cannot afford. What would you answer?
+
+Submit (300–400 words, post publicly, tag #GKMBA)
+
+The trap, the turn, the price, the engine — one paragraph each, in your own words.
+
+One thing he did that you can copy inside the next 30 days. Be specific. "Work hard" is not an answer. "Teach one free class on Sunday to five people" is.
+
+What is your Super 30 — the small thing you could start with nothing? And what is your Super Infinity — the version of it that reaches thousands?
+
+The real lesson
+
+Every film you watch from now on gets the same treatment. Trap, turn, price, engine. Then find out what happened to the real person afterwards, because films end and lives do not. Anand Kumar's film ended with a courtroom win. His life went on to build a campus. That gap between the ending and today is where the actual lesson lives.
+</script>
+
+<script type="text/markdown" id="md-po-film-templegrandin">
+## Assignment brief (as given)
+
+A girl who did not speak until she was four, who could not stand being touched, who was told she belonged in an institution, ended up designing the cattle handling systems that roughly half of North America's beef industry now runs on. She got there by noticing what everybody else was too busy to see.
+
+### **How to watch it**
+
+Four hunts. This one is about turning a supposed defect into a working method:
+
+- **The trap**: a brain that takes in the world differently in a school system built for one kind of student, in an era where the recommended answer was to put her away. Notice who keeps insisting she is capable: her mother, one teacher, one aunt.
+- **The turn**: she stops treating her way of thinking as a problem to hide and starts using it as equipment. She sees in pictures, so she walks the cattle chute on her hands and knees to see what a cow sees. Nobody with a normal brain thought to do that.
+- **The price**: being laughed at, having her drawings dismissed, being the only woman on a Texas feedlot, and the sheer physical cost of a world full of noise and touch she could not filter.
+- **The engine: ** the science teacher who redirected her obsessions into projects rather than punishing them. Note the exact technique he used: he never told her to stop being odd, he told her to go measure something.
+
+### Then find out where she is today
+
+She is still teaching animal science at Colorado State University, where she now holds the university's distinguished professor title, still consulting for the meat industry, still lecturing to packed halls, and still supervising graduate students who carry her methods forward. She is in her late seventies. Her later books argue that schools have squeezed out the hands-on, visual, build-it kids and that industry is now short of exactly the minds it stopped training.
+
+Read her on that, then answer:
+
+- She turned a personal difference into a professional advantage that nobody else could copy. What is yours? Be honest, not modest.
+- She claims the world needs fewer word-thinkers and more picture-thinkers. Look at your own field and say whether she is right.
+
+### _**Submit (250–300 words, post publicly, tag #GKMBA)**_
+
+- Trap, turn, price, engine: two or three lines each.
+
+- Go and look at something with your own eyes this week that everyone in your industry only reads about in reports — a shop floor, a warehouse, a customer's kitchen, a classroom. Write what you saw that the reports miss.
+- Name the trait people have criticized you for since childhood. Then write one way it could be an asset in the work you want.
+
+**The point:** She did not overcome how her brain works. She found the one job on earth where it was the best possible brain to have, and then she built it into an industry standard.
+</script>
+
+<script type="text/markdown" id="md-po-film-imitation">
+## Assignment brief (as given)
+
+A rude, awkward mathematician tells a room full of senior officers that their method is wrong and asks for money to build something nobody understands. He is right. Breaking that code is estimated to have shortened the war by years and saved millions of lives and almost nobody was allowed to know for decades.
+
+How to watch it
+
+Four hunts, and this trap is one you may recognize from your own office:
+
+The trap: not poverty. He is a genius who cannot get along with people, cannot explain himself, and works on something classified so completely that no credit can ever be claimed.
+
+The turn: he stops trying to beat the machine by hand and builds a machine to beat a machine. Find that switch. It is the difference between working hard and working at the right level.
+
+The price: Britain convicted him in 1952 for being homosexual, forced hormone treatment on him, and stripped his security clearance. He died in 1954 at forty-one. An official apology came in 2009, a royal pardon in 2013. He was owed all of it while alive and got none of it.
+
+The engine: Joan Clarke, and the team he nearly drove away. Watch what changes in his results once he learns to be tolerable to work with.
+
+Then find out what the ideas are doing today
+
+He asked in 1950 whether a machine could hold a conversation well enough that you could not tell it from a person. In 2025 researchers ran his three-party test properly and found GPT-4.5, told to act like a person, was picked as the human 73% of the time, chosen more often than the actual humans. The study was published in a leading journal this year. Read about it, then answer:
+
+His question sat unanswered for seventy-five years and then got answered in your lifetime. What does that do to your assumptions about what stays impossible?
+You are now competing in a labor market with the thing he imagined. Name one task you do that would fail his test, and one that would not.
+
+Submit (250–300 words, post publicly, tag #GKMBA)
+
+Trap, turn, price, engine: two or three lines each.
+
+Your machine: where are you doing by hand what a system, a template, a tool or an assistant could do while you sleep? Build one small version this week and show it.
+
+The Joan Clarke question: who around you is being overlooked because of how they look or where they come from, and what would it cost you to back them?
+
+The point: The best work of his life was invisible for thirty years, and the country he saved punished him anyway. Do the work regardless but never assume the system will reward you fairly. Build your own proof.
+
+One note for the classroom: the section on his conviction and death is heavy for a large group. Keep it factual when you present it, and it will land as history rather than tragedy.
+</script>
+
+<script type="text/markdown" id="md-po-film-manwhoknewinfinity">
+## Assignment brief (as given)
+
+A shipping clerk in Madras, no degree, failed college twice, mails his scribbled formulas to strangers in England. Two professors bin the letter. The third one reads it. Everything after that comes from one man deciding to take an unknown seriously.
+
+How to watch it
+
+Run the four hunts, and mind that the trap here is not poverty alone:
+
+The trap — he had the answers and no permission to be heard. List every gate he was locked out of: degree, language, color, distance, food, war.
+
+The turn — the letter. Notice what he put in it and what he left out. That letter is a cold pitch, and it worked. Study its structure.
+
+The price — Cambridge demanded proofs for things he simply saw. He gave them years of drudgery, ate almost nothing during the war, fell ill, and died at 32, barely a year after going home.
+
+The engine — Hardy. A rude, godless Englishman who fought his own colleagues to get a brown clerk elected to the Royal Society. Track what a sponsor actually does versus what a fan does.
+Then find out what the notebooks are doing today
+
+He has been gone since 1920, so the question changes. In 1976 an American mathematician, George Andrews, found a bundle of loose sheets from Ramanujan's final year sitting in a dead professor's box in the Wren Library at Trinity College, Cambridge, around a hundred pages nobody had read for over fifty years. Those pages contained his mock theta functions, which turned out to help physicists calculate the entropy of black holes.
+Look it up, then answer:
+
+Formulas written by a dying man in a village outside Madras are now used on black holes. What does that say about work whose value nobody can price yet?
+Fifty-six years his best pages sat in a box. What is sitting in your box?
+
+Submit (250–300 words, post publicly, tag #GKMBA)
+
+Trap, turn, price, engine — two or three lines each.
+Write your own Hardy letter. One page, to one specific person who could open a door for you, showing your best work rather than describing it. Send it before you submit. Screenshot the sent mail.
+Name one thing you have made that nobody has seen. Publish it this week, even unfinished.
+
+The point: Talent locked in a drawer is indistinguishable from no talent at all. He got out because he wrote to a stranger, and because a stranger wrote back.
+</script>
+
+<script type="text/markdown" id="md-po-film-pursuit">
+## Assignment brief (as given)
+
+A man with no degree, no savings and a small son talks his way into a room he has no business being in. That is the whole course in two hours.
+
+How to watch it
+
+Same four things, notebook open:
+
+The trap — what exactly is holding him down? Be precise. It is not "poverty."
+The turn — the moment he stops applying and starts selling himself. Note the timestamp.
+The price — what it cost him and who else paid it.
+The engine — the small thing he does every single day that nobody claps for.
+
+Watch the Rubik's cube scene twice. That is not luck. That is a man carrying proof of himself in his pocket, waiting for a stranger to ask.
+
+After the film — research
+
+Look up the real Chris Gardner. Two facts the film leaves out, and both matter more than the film:
+
+Before finance he was a lab assistant, then a medical equipment salesman, and the whole thing started when he gave up his parking space to a man in a Ferrari and asked him two questions — what do you do, and how do you do it. Two questions. That was the entire strategy.
+
+Encyclopedia Britannica
+
+He founded Gardner Rich in 1987, then sold his stake in 2006 and published the book. Find out which one made him more money — the brokerage or the story about the brokerage. The answer will change how you think about your own work.
+
+Wikipedia
+
+Then find what he is doing in 2026, and what his son does now. The son is not a child anymore.
+
+Submit — 300 words, posted publicly, tagged #GKMBA
+
+Trap, turn, price, engine — one short paragraph each.
+
+Name your Ferrari question. Who is the one person you could ask "what do you do and how do you do it" this month? Then ask them and report what happened.
+</script>
+
+<script type="text/markdown" id="md-po-film-theoryofeverything">
+## Assignment brief (as given)
+
+At twenty-one he was told he had two years to live. He got fifty-five. In that borrowed time he worked out that black holes are not entirely black, wrote a book on cosmology that sold in the millions to people who never finished it, and became the most recognized scientist on earth while losing the use of almost every muscle he had.
+
+### **How to watch it**
+
+Four hunts. This one is about what happens when the body stops cooperating and the work does not:
+
+- **The trap:** a diagnosis with a deadline attached, arriving in the exact year his real work was beginning. Notice how fast the world starts speaking about him instead of to him.
+- **The turn**:  the decision to keep going after the hospital. Also watch the shift in his method: as writing became impossible, he moved the mathematics into his head and worked in pictures. He adapted the tool to the hand he had left.
+- **The price**:  a marriage that could not survive the caregiving, a household run on exhaustion, dignity traded away piece by piece. Watch Jane through the middle of the film. She is doing the harder job.
+- **The engine: ** the students, the wheelchair engineers, the speech machine, the graduate assistants. His famous voice was built by other people so that he could keep talking. Count the hands.
+
+### Then find out where his ideas stand today
+
+He died in 2018. His central claim: that black holes leak radiation and slowly evaporate, created a puzzle nobody has fully solved: if a black hole disappears, what happened to everything that fell in? That question is one of the live problems in physics right now, and his last paper before he died was an attempt at it. Meanwhile astronomers have photographed a black hole, something he never got to see. Look all this up, then answer:
+
+- He spent decades on a problem he knew he would not finish. Why would anyone start work like that?
+- His body failed and his output rose. What does that say about the excuses you are currently using?
+
+### Submit (250–300 words, post publicly, tag #GKMBA)
+
+- Trap, turn, price, engine: two or three lines each.
+- Your borrowed time: assume you have three good working years left. Write what you would stop doing tomorrow morning, and what you would start.
+
+- Name the constraint you keep waiting to disappear before you begin: money, health, visa, permission, a job. Now describe how you would work around it instead of through it, this week.
+
+**The point:** He was given a deadline and treated it as a schedule. Most people are given decades and treat them as an excuse.
+</script>
+
+<script type="text/markdown" id="md-po-50books">
+## Assignment brief (as given)
+
+Read at least one book this week and share what you have learned.
+
+Here's the whole list — 50 books. Free to browse: https://amzn.to/4fEG1Tr
+
+#GKMBA
+</script>
+
+<script type="text/markdown" id="md-po-affiliate">
+## Assignment brief (as given)
+
+Here is your chance to earn money this week. Make your account using the same email you used for GKMBA and start sharing the books, masterclasses, and other services across your network. Post your weekly movie assignments, feedback and learning videos with your own customized link so you can earn from each traction, and track your visibility index. Sign up today: https://www.zeeshanusmani.com/partners/
+</script>
+
+<script type="text/markdown" id="md-po-astaghfar">
+## Assignment brief (as given)
+
+This activity will repeat every week until the end of the cohort.
+This assignment is only for a given 7-day window.
+Write your astaghfar count for each day.
+If you missed a day, write “Missed.” Do not guess or add false numbers later. Honest missed days are accepted.
+Submit:
+Saturday | count or Missed
+Sunday | count or Missed
+Monday | count or Missed
+Tuesday | count or Missed
+Wednesday | count or Missed
+Thursday | count or Missed
+Friday | count or Missed
+Weekly total | number
+#NoReels reminder:
+Did you avoid Instagram Reels, YouTube Shorts and TikTok videos this week? | Yes or No
+A new assignment with new dates is created each week; do not report future dates in a past week's assignment.
+</script>
+
+<script type="text/markdown" id="md-po-earnsomething">
+## Assignment brief (as given)
+
+Post a screenshot of any earning you did this week
+</script>
+
+<script type="text/markdown" id="md-po-youtubeshorts">
+## Assignment brief (as given)
+
+1.	Bagawat - https://www.youtube.com/watch?v=5of3pbidxrQ&list=RD5of3pbidxrQ&start_radio=1
+2.	Manual Scavanging – Bezwada Wilson - https://www.youtube.com/watch?v=xNJDZU4ZEd8
+3.	M. Irfan at Jantar Mantar – CJP Protest - https://www.youtube.com/watch?v=tsIaeMw3cGs&t=1028s
+</script>
+
+<script type="text/markdown" id="md-po-fiveoffers">
+## Assignment brief (as given)
+
+Write an offer about what you can do, send it to 5 people, share the results
+</script>
+
+<script type="text/markdown" id="md-po-gkmbastory">
+## Assignment brief (as given)
+
+In week one you stood in front of a phone for sixty seconds and told strangers who you were. Fourteen sessions later, it is time to face the lens again and report what happened.
+
+This one is compulsory. Skip it and there is no certificate.
+
+### **What to Record?**
+
+A reel-style video, 90 to 180 seconds, phone held vertical, you talking straight into the camera. Cover four things:
+
+- What you know now that you did not know in July.
+- Did anything move: a new job, a raise, a client, a city, a country?
+- Did you earn money you would not have made otherwise? Name the amount if you are comfortable.
+- One line for the person still deciding whether to join.
+
+No script on the screen, no reading from notes. Say it the way you would explain it to a cousin. If something in the course did not work for you, put that in as well. An honest clip is worth more to me than a flattering one.
+
+### **Where to post**
+
+YouTube first. Upload it there, copy the link, and drop it in the group. Then repost the same clip on Instagram, Facebook, LinkedIn, TikTok (wherever you already have an audience.)
+
+Tag #GKMBA on every platform so the cohort can find each other.
+
+### **Submission rule**
+
+A live YouTube link. Screenshots and WhatsApp uploads do not count. If I cannot click it, it was never submitted.
+
+### **The point**
+
+Hundreds of you, across thirty-seven countries, took a bet on this cohort. Your face on screen, telling the truth about what changed, is the proof for the next student weighing the same decision, and for you, because saying it out loud makes it real.
+
+**#GKMBA**
+</script>
+
+<script type="text/markdown" id="md-po-reports">
+## Assignment brief (as given)
+
+Your individual reports are ready. Just go to these website and use coupon code GKMBASTUDENT with the same email ID you use for this course. You will get 100% free report.
+
+1. https://skilledscore.com/
+2. https://personality.zeeshanusmani.com/
+3. https://visabridge.com/
+
+Don't forget to share your results/insights/score with your network on social media. Use #GKMBA and #SkilledScore or #PersonalityInsights or #VisaBridge hashtags so we can track your learning as  well
+</script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/11.1.1/marked.min.js"></script>
 <script>
 (function(){
@@ -1999,7 +3263,8 @@ Fractional/volunteer: Applied to a part-time fractional analyst role on 2026-10-
       var modules = [
         {id:'module-who', label:'Who Are You?'},
         {id:'module-package', label:'Package Yourself'},
-        {id:'module-monetize', label:'Monetize & Multiply'}
+        {id:'module-monetize', label:'Monetize & Multiply'},
+        {id:'module-portal', label:'Portal Bonus'}
       ];
       var overallDone = 0, overallTotal = 0;
       modules.forEach(function(m){
@@ -2049,6 +3314,24 @@ Fractional/volunteer: Applied to a part-time fractional analyst role on 2026-10-
       document.querySelectorAll('.chk').forEach(function(c){ c.checked = false; });
       document.querySelectorAll('details.assignment').forEach(function(d){ d.setAttribute('data-done','0'); });
       updateAll();
+    });
+
+
+    var FILTER_KEY = 'gkmba-tracker-filter-v1';
+    var filterTabs = document.querySelectorAll('.filter-tab');
+    function applyFilter(f){
+      document.body.setAttribute('data-filter', f);
+      filterTabs.forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-filter') === f ? 'true' : 'false'); });
+    }
+    var savedFilter = 'all';
+    try{ savedFilter = localStorage.getItem(FILTER_KEY) || 'all'; }catch(e){}
+    applyFilter(savedFilter);
+    filterTabs.forEach(function(b){
+      b.addEventListener('click', function(){
+        var f = b.getAttribute('data-filter');
+        applyFilter(f);
+        try{ localStorage.setItem(FILTER_KEY, f); }catch(e){}
+      });
     });
 
     updateAll();
